@@ -1,1115 +1,1676 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Valor — Bravery Stories</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-
 :root {
+  --ink: #1a1a18;
+  --ink2: #4a4a46;
+  --ink3: #8a8a84;
+  --paper: #faf9f6;
+  --paper2: #f2f1ec;
+  --paper3: #e8e6de;
+  --rule: #dddbd2;
+  --crimson: #b5243a;
+  --crimson-light: #fdf0f2;
+  --gold: #c8922a;
+  --gold-light: #fdf8f0;
+  --green: #1f6b44;
+  --green-light: #edf7f2;
+  --radius: 3px;
+  --radius-md: 8px;
+  --display: 'Cormorant Garamond', Georgia, serif;
+  --body-serif: 'Libre Baskerville', Georgia, serif;
+  --sans: 'Outfit', system-ui, sans-serif;
+  --shadow: 0 2px 16px rgba(26,26,24,.08);
+  --shadow-lg: 0 8px 48px rgba(26,26,24,.14);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font-family: var(--sans); }
+.hidden { display: none !important; }
+img { display: block; }
 
-  --bg:#ffffff; --bg2:#f8f7f4; --bg3:#f0efe9;
+/* ── MASTHEAD ── */
+.masthead {
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  position: sticky; top: 0; z-index: 300;
+}
+.masthead-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 62px;
+  border-bottom: 1px solid var(--rule);
+}
+.masthead-logo {
+  font-family: var(--display);
+  font-size: 2rem; font-weight: 700; letter-spacing: .04em;
+  color: var(--ink); cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-star {
+  width: 28px; height: 28px; background: var(--crimson);
+  clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+}
+.masthead-nav {
+  display: flex; gap: 0;
+}
+.mnav-btn {
+  padding: 8px 18px; background: none; border: none;
+  font-size: .8rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink3); cursor: pointer; transition: color .15s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.mnav-btn:hover { color: var(--ink); }
+.mnav-btn.active { color: var(--crimson); border-bottom-color: var(--crimson); }
+.masthead-right { display: flex; align-items: center; gap: 12px; }
+.user-chip {
+  display: flex; align-items: center; gap: 7px;
+  font-size: .8rem; color: var(--ink2);
+}
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--paper3); border: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 600; color: var(--ink2);
+  overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.btn-primary {
+  padding: 8px 20px; background: var(--ink); color: var(--paper);
+  border: none; border-radius: var(--radius); font-size: .8rem;
+  font-weight: 500; letter-spacing: .04em; cursor: pointer; transition: background .15s;
+}
+.btn-primary:hover { background: var(--ink2); }
+.btn-ghost {
+  padding: 8px 16px; background: none; color: var(--ink2);
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  font-size: .8rem; font-weight: 500; cursor: pointer; transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--ink2); color: var(--ink); }
 
-  --text:#111111; --text2:#555550; --text3:#99998f;
+/* ── PAGES ── */
+.page { display: none; min-height: calc(100vh - 62px); }
+.page.active { display: block; }
 
-  --border:#e5e4de; --border2:#d0cfc8;
+/* ══════════ FEED ══════════ */
+.feed-masthead-band {
+  background: var(--ink);
+  padding: 4rem 2rem 3.5rem;
+  text-align: center;
+  border-bottom: 4px solid var(--crimson);
+}
+.feed-eyebrow {
+  font-family: var(--sans); font-size: .7rem; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--crimson); margin-bottom: 1rem;
+}
+.feed-headline {
+  font-family: var(--display); font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 300; line-height: 1.04; color: var(--paper);
+  margin-bottom: 1.2rem;
+}
+.feed-headline em { font-style: italic; color: rgba(255,255,255,.55); }
+.feed-subhead {
+  font-family: var(--body-serif); font-size: 1rem;
+  color: rgba(255,255,255,.45); max-width: 440px; margin: 0 auto 2rem;
+  line-height: 1.7; font-style: italic;
+}
+.feed-cta {
+  padding: 11px 28px; background: var(--crimson); color: white;
+  border: none; border-radius: var(--radius); font-size: .85rem;
+  font-weight: 500; letter-spacing: .04em; cursor: pointer; transition: background .15s;
+}
+.feed-cta:hover { background: #9a1e30; }
 
-  --accent:#c0392b; --accent-hover:#a93226; --accent-light:#fdf0ef;
-
-  --green:#1a7a4a; --green-light:#edf7f2;
-
-  --radius:14px; --radius-sm:9px; --radius-xs:6px;
-
-  --shadow-lg:0 12px 48px rgba(0,0,0,.12);
-
-  --serif:'DM Serif Display',Georgia,serif;
-
-  --sans:'DM Sans',system-ui,sans-serif;
-
-  --tr:all .18s cubic-bezier(.4,0,.2,1);
-
+.feed-container { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem; }
+.feed-section-label {
+  font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink3); padding-bottom: .6rem;
+  border-bottom: 1px solid var(--rule); margin-bottom: 2rem;
 }
 
-*{box-sizing:border-box;margin:0;padding:0;}
-
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
-
-button,input,textarea,select{font-family:var(--sans);}
-
-.hidden{display:none!important;}
-
-
-
-/* NAV */
-
-nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;height:58px;}
-
-.nav-logo{font-family:var(--serif);font-size:1.45rem;color:var(--text);display:flex;align-items:center;gap:9px;cursor:pointer;}
-
-.logo-mark{width:30px;height:30px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-
-.logo-mark svg{width:16px;height:16px;fill:white;}
-
-.nav-links{display:flex;align-items:center;gap:2px;}
-
-.nav-btn{padding:6px 14px;border-radius:8px;font-size:.875rem;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;transition:var(--tr);}
-
-.nav-btn:hover{background:var(--bg2);color:var(--text);}
-
-.nav-btn.active{background:var(--accent-light);color:var(--accent);}
-
-.nav-right{display:flex;align-items:center;gap:10px;}
-
-.nav-user{font-size:.82rem;color:var(--text2);}
-
-.nav-cta{padding:7px 18px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:.875rem;font-weight:500;cursor:pointer;transition:var(--tr);}
-
-
-
-/* PAGES */
-
-.page{display:none;min-height:calc(100vh - 58px);}
-
-.page.active{display:block;}
-
-
-
-/* FEED HERO */
-
-.feed-hero{background:linear-gradient(140deg,#160806 0%,#2a1008 55%,#160806 100%);padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;}
-
-.feed-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,rgba(192,57,43,.22),transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(181,134,13,.08),transparent 50%);}
-
-.feed-hero h1{font-family:var(--serif);font-size:clamp(2.4rem,6vw,4.5rem);color:white;line-height:1.08;margin-bottom:1rem;position:relative;}
-
-.feed-hero p{color:rgba(255,255,255,.55);font-size:1.05rem;max-width:460px;margin:0 auto 2rem;position:relative;}
-
-.btn-red{padding:11px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-size:.9rem;font-weight:500;cursor:pointer;transition:var(--tr);}
-
-
-
-/* FEED CARDS */
-
-.feed-wrap{display:flex;max-width:1200px;margin:0 auto;padding:2rem;}
-
-.story-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2rem;width:100%;}
-
-.scard{background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;transition:box-shadow .2s;cursor:pointer;}
-
-.scard:hover{box-shadow:var(--shadow-lg);}
-
-.scard-media{position:relative;height:216px;background:linear-gradient(145deg,#160806,#3a1912);overflow:hidden;}
-
-.scard-thumb{width:100%;height:100%;object-fit:cover;}
-
-.cat-tag{position:absolute;top:10px;left:10px;background:var(--accent);color:white;font-size:.68rem;font-weight:600;padding:4px 10px;border-radius:100px;text-transform:uppercase;}
-
-.scard-body{padding:1.2rem 1.4rem;}
-
-.scard-title{font-family:var(--serif);font-size:1.22rem;line-height:1.28;color:var(--text);margin-bottom:.4rem;}
-
-.scard-exc{font-size:.875rem;color:var(--text2);line-height:1.6;margin-bottom:.9rem;}
-
-
-
-/* CREATE PIPELINE (STEPS UX) */
-
-.create-wrap{max-width:820px;margin:0 auto;padding:3rem 2rem;}
-
-.create-wrap h2{font-family:var(--serif);font-size:2.5rem;margin-bottom:.4rem;}
-
-.create-wrap>p{color:var(--text2);margin-bottom:2.5rem;}
-
-.steps{display:flex;align-items:center;margin-bottom:2.5rem;}
-
-.step-item{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:500;color:var(--text3);}
-
-.step-item.on{color:var(--accent);}
-
-.step-item.done{color:var(--text);}
-
-.step-num{width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.72rem;flex-shrink:0;}
-
-.step-item.on .step-num{background:var(--accent);color:white;border-color:var(--accent);}
-
-.step-item.done .step-num{background:var(--text);color:white;border-color:var(--text);}
-
-.step-line{flex:1;height:1px;background:var(--border);margin:0 6px;}
-
-
-
-.flabel{font-size:.78rem;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:7px;}
-
-.finput{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-xs);font-size:.95rem;color:var(--text);outline:none;background:white;}
-
-.finput:focus{border-color:var(--accent);}
-
-textarea.finput{min-height:160px;resize:vertical;line-height:1.65;}
-
-.fsection{margin-bottom:1.75rem;}
-
-
-
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:2.5rem 2rem;text-align:center;cursor:pointer;background:var(--bg2);}
-
-.upload-zone:hover{border-color:var(--accent);background:var(--accent-light);}
-
-.upload-zone h4{font-size:.95rem;font-weight:500;margin-bottom:.2rem;}
-
-
-
-.provider-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.75rem;}
-
-.provider-default{padding:1.2rem 1.5rem;display:flex;align-items:center;gap:14px;}
-
-.provider-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-
-.provider-text h4{font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:2px;}
-
-.provider-text p{font-size:.8rem;color:var(--text2);line-height:1.4;}
-
-.rec-badge{background:var(--green-light);color:var(--green);font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:100px;text-transform:uppercase;margin-left:6px;}
-
-
-
-.gen-btn{width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:var(--radius-xs);font-size:1rem;font-weight:500;cursor:pointer;margin-top:1rem;}
-
-.back-btn{padding:12px 22px;background:var(--bg3);color:var(--text);border:none;border-radius:var(--radius-xs);font-size:.95rem;font-weight:500;cursor:pointer;margin-top:1rem;}
-
-
-
-.key-row{margin-top:.9rem;}
-
-.key-row label{font-size:.75rem;color:var(--text2);margin-bottom:5px;display:block;}
-
-.key-row input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);font-size:.85rem;outline:none;color:var(--text);}
-
-
-
-.gen-state{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;text-align:center;}
-
-.spinner{width:46px;height:46px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto .9rem;}
-
-@keyframes spin{to{transform:rotate(360deg);}}
-
-.prog-wrap{height:4px;background:var(--border);border-radius:2px;margin:1rem 0 .4rem;overflow:hidden;}
-
-.prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0;transition:width .4s ease;}
-
-.done-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;text-align:center;}
-
-.done-icon{width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.1rem;}
-
-
-
-/* STORY VIEW */
-
-.sp-hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;}
-
-.sp-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
-
-.sp-hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom, transparent, rgba(10,10,10,0.85) 60%, #0a0a0a 100%);}
-
-.sp-hero-content{position:relative;z-index:2;padding:3rem 2.5rem 2.5rem;max-width:860px;margin:0 auto;width:100%;text-align:center;}
-
-.sp-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4.5rem);line-height:1.06;color:white;margin-bottom:1rem;text-shadow:0 4px 20px rgba(0,0,0,0.5);}
-
-
-
-.sp-body{max-width:800px;margin:0 auto;padding:4rem 2.5rem;background:#0a0a0a;}
-
-.sp-prose{font-family:'Crimson Pro',serif;font-size:1.35rem;line-height:1.88;color:#f0f0f0;}
-
-.sp-prose p{margin-bottom:2rem;}
-
-.sp-prose .hook{font-size:1.6rem;font-style:italic;color:#fff;margin-bottom:3rem;border-left:4px solid var(--accent);padding-left:1.5rem;}
-
-.sp-prose strong{color:#fff;font-weight:700;}
-
-
-
-.sp-pullquote{margin:3rem -2rem;padding:3rem;background:#111;border-left:6px solid var(--accent);}
-
-.sp-pullquote blockquote{font-family:'Playfair Display',serif;font-size:1.8rem;line-height:1.4;font-style:italic;color:#fff;}
-
-
-
-.sp-mosaic{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin:3rem 0;height:400px;}
-
-.sp-mosaic-img{border-radius:10px;overflow:hidden;background:#111;}
-
-.sp-mosaic-img img{width:100%;height:100%;object-fit:cover;display:block;}
-
-.sp-mosaic-col{display:grid;grid-template-rows:1fr 1fr;gap:10px;}
-
-
-
-.sp-video-box{margin:3rem 0;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;border:1px solid #222;}
-
-.sp-video-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;background:linear-gradient(45deg, #050505, #111);}
-
-
-
-/* TOAST */
-
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:white;padding:12px 28px;border-radius:100px;font-size:.85rem;font-weight:600;z-index:1000;opacity:0;transition:all 0.3s;pointer-events:none;}
-
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
+/* Editorial grid */
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+.scard {
+  cursor: pointer; transition: transform .2s;
+  border: 1px solid var(--rule); background: white;
+}
+.scard:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.scard.featured { grid-column: span 7; }
+.scard.side { grid-column: span 5; }
+.scard.third { grid-column: span 4; }
+.scard-img {
+  position: relative; overflow: hidden;
+  background: var(--paper3);
+}
+.scard.featured .scard-img { height: 420px; }
+.scard.side .scard-img { height: 260px; }
+.scard.third .scard-img { height: 200px; }
+.scard-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+.scard:hover .scard-img img { transform: scale(1.03); }
+.scard-cat {
+  position: absolute; top: 12px; left: 12px;
+  background: var(--crimson); color: white;
+  font-size: .6rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; padding: 4px 10px;
+}
+.scard-body { padding: 1.25rem 1.4rem 1.5rem; }
+.scard-title {
+  font-family: var(--display); font-weight: 600;
+  line-height: 1.22; color: var(--ink); margin-bottom: .5rem;
+}
+.scard.featured .scard-title { font-size: 1.75rem; }
+.scard.side .scard-title { font-size: 1.3rem; }
+.scard.third .scard-title { font-size: 1.1rem; }
+.scard-exc {
+  font-family: var(--body-serif); font-size: .82rem;
+  color: var(--ink2); line-height: 1.65; margin-bottom: .8rem;
+}
+.scard-byline {
+  font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.scard-byline span { color: var(--crimson); }
+.scard.third .scard-exc { display: none; }
+
+/* ══════════ CREATE WIZARD ══════════ */
+.wizard-layout {
+  display: grid; grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 62px);
+}
+.wizard-sidebar {
+  background: var(--ink);
+  padding: 2.5rem 1.75rem;
+  position: sticky; top: 62px; height: calc(100vh - 62px);
+  overflow-y: auto;
+}
+.wizard-sidebar-title {
+  font-family: var(--display); font-size: 1.4rem; font-weight: 300;
+  color: var(--paper); margin-bottom: .3rem;
+}
+.wizard-sidebar-sub {
+  font-size: .72rem; color: rgba(255,255,255,.35);
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2rem;
+}
+.wsteps { display: flex; flex-direction: column; gap: 2px; }
+.wstep {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: .75rem 1rem; border-radius: var(--radius-md);
+  cursor: default; transition: background .15s;
+}
+.wstep.on { background: rgba(255,255,255,.08); }
+.wstep.done { opacity: .6; }
+.wstep-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.4);
+  flex-shrink: 0; margin-top: 1px;
+}
+.wstep.on .wstep-num { border-color: var(--crimson); color: white; background: var(--crimson); }
+.wstep.done .wstep-num { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.wstep-label {
+  font-size: .82rem; font-weight: 500; color: rgba(255,255,255,.5);
+  line-height: 1.2; margin-bottom: 2px;
+}
+.wstep.on .wstep-label { color: white; }
+.wstep-desc { font-size: .7rem; color: rgba(255,255,255,.25); line-height: 1.4; }
+.wstep.on .wstep-desc { color: rgba(255,255,255,.45); }
+.step-connector {
+  width: 1px; height: 14px; background: rgba(255,255,255,.1);
+  margin-left: calc(1rem + 11px);
+}
+
+.wizard-main { background: var(--paper); overflow-y: auto; }
+.wizard-panel { display: none; padding: 3rem 3.5rem; max-width: 760px; }
+.wizard-panel.active { display: block; }
+
+.wpanel-eyebrow {
+  font-size: .68rem; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--crimson); margin-bottom: .6rem;
+}
+.wpanel-title {
+  font-family: var(--display); font-size: 2.4rem; font-weight: 400;
+  color: var(--ink); margin-bottom: .5rem; line-height: 1.1;
+}
+.wpanel-sub {
+  font-family: var(--body-serif); font-size: .9rem; font-style: italic;
+  color: var(--ink3); margin-bottom: 2.5rem; line-height: 1.65;
+}
+
+/* Form elements */
+.field { margin-bottom: 1.75rem; }
+.field-label {
+  font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink2); display: block; margin-bottom: 8px;
+}
+.field-input {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  font-size: .95rem; color: var(--ink); background: white; outline: none;
+  transition: border-color .15s;
+}
+.field-input:focus { border-color: var(--ink); }
+.field-input.textarea { min-height: 180px; resize: vertical; line-height: 1.7; font-family: var(--body-serif); font-size: .9rem; }
+
+/* Provider cards */
+.provider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1rem; }
+.provider-card {
+  border: 1.5px solid var(--rule); border-radius: var(--radius-md);
+  padding: 1rem 1.1rem; cursor: pointer; transition: all .15s;
+  background: white; position: relative;
+}
+.provider-card:hover { border-color: var(--ink2); }
+.provider-card.selected { border-color: var(--ink); background: var(--paper2); }
+.provider-card.connected { border-color: var(--green); }
+.pcard-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.pcard-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+.pcard-name { font-size: .9rem; font-weight: 600; color: var(--ink); }
+.pcard-model { font-size: .72rem; color: var(--ink3); }
+.pcard-desc { font-size: .75rem; color: var(--ink2); line-height: 1.45; }
+.pcard-badges { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+.badge {
+  font-size: .6rem; font-weight: 600; letter-spacing: .06em;
+  padding: 2px 7px; border-radius: 100px; text-transform: uppercase;
+}
+.badge-rec { background: var(--green-light); color: var(--green); }
+.badge-oauth { background: #edf3fb; color: #2a5db0; }
+.badge-key { background: var(--gold-light); color: var(--gold); }
+.badge-free { background: var(--paper2); color: var(--ink3); }
+.pcard-check {
+  position: absolute; top: 10px; right: 10px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--ink); display: none;
+  align-items: center; justify-content: center;
+}
+.pcard-check svg { width: 10px; height: 10px; stroke: white; fill: none; stroke-width: 2.5; }
+.provider-card.selected .pcard-check { display: flex; }
+.provider-card.connected .pcard-check { display: flex; background: var(--green); }
+
+/* Connect panel */
+.connect-panel {
+  border: 1px solid var(--rule); border-radius: var(--radius-md);
+  padding: 1.5rem; background: var(--paper2); margin-top: 1rem;
+  animation: slideDown .2s ease;
+}
+@keyframes slideDown { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+.connect-panel h4 { font-size: .9rem; font-weight: 600; margin-bottom: .35rem; }
+.connect-panel p { font-size: .78rem; color: var(--ink2); margin-bottom: 1rem; line-height: 1.5; }
+.key-input-row { display: flex; gap: 8px; }
+.key-input-row input {
+  flex: 1; padding: 9px 12px; border: 1px solid var(--rule);
+  border-radius: var(--radius); font-size: .85rem; outline: none;
+  background: white; color: var(--ink);
+}
+.key-input-row input:focus { border-color: var(--ink); }
+.btn-connect {
+  padding: 9px 18px; background: var(--ink); color: white;
+  border: none; border-radius: var(--radius); font-size: .8rem;
+  font-weight: 500; cursor: pointer; white-space: nowrap; transition: background .15s;
+}
+.btn-connect:hover { background: var(--ink2); }
+.btn-oauth {
+  width: 100%; padding: 10px; border: 1px solid var(--rule);
+  border-radius: var(--radius); background: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: .85rem; font-weight: 500; color: var(--ink); transition: all .15s;
+}
+.btn-oauth:hover { border-color: var(--ink2); background: var(--paper2); }
+.connected-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .8rem; color: var(--green); font-weight: 500;
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+/* Wizard nav buttons */
+.wizard-nav { display: flex; gap: 10px; margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+.btn-back {
+  padding: 11px 22px; background: none; border: 1px solid var(--rule);
+  color: var(--ink2); border-radius: var(--radius); font-size: .875rem;
+  font-weight: 500; cursor: pointer; transition: all .15s;
+}
+.btn-back:hover { border-color: var(--ink2); color: var(--ink); }
+.btn-next {
+  padding: 11px 28px; background: var(--ink); color: white;
+  border: none; border-radius: var(--radius); font-size: .875rem;
+  font-weight: 500; cursor: pointer; transition: background .15s; flex: 1;
+}
+.btn-next:hover { background: var(--crimson); }
+.btn-next.publish { background: var(--crimson); }
+.btn-next.publish:hover { background: #9a1e30; }
+
+/* Generation progress */
+.gen-panel {
+  padding: 3rem 3.5rem; display: none; max-width: 760px;
+}
+.gen-panel.active { display: block; }
+.gen-stage {
+  display: flex; align-items: center; gap: 14px;
+  padding: 1rem 1.25rem; border-radius: var(--radius-md);
+  border: 1px solid var(--rule); background: white; margin-bottom: .75rem;
+  transition: all .3s;
+}
+.gen-stage.running { border-color: var(--gold); background: var(--gold-light); }
+.gen-stage.done { border-color: var(--green); background: var(--green-light); }
+.gen-stage.error { border-color: var(--crimson); background: var(--crimson-light); }
+.stage-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0; background: var(--paper3);
+}
+.gen-stage.running .stage-icon { background: var(--gold-light); }
+.gen-stage.done .stage-icon { background: var(--green-light); }
+.stage-name { font-size: .85rem; font-weight: 600; color: var(--ink); }
+.stage-status { font-size: .75rem; color: var(--ink3); margin-top: 2px; }
+.gen-stage.running .stage-status { color: var(--gold); }
+.gen-stage.done .stage-status { color: var(--green); }
+.stage-spin {
+  width: 18px; height: 18px; border: 2px solid var(--rule);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin .7s linear infinite; margin-left: auto; flex-shrink: 0;
+}
+.stage-tick { margin-left: auto; color: var(--green); font-size: 1.1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════ STORY VIEW ══════════ */
+.story-page { background: var(--paper); }
+.story-hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 82vh; border-bottom: 1px solid var(--rule);
+}
+.story-hero-text {
+  padding: 5rem 4rem;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  background: var(--ink);
+}
+.story-hero-cat {
+  font-size: .65rem; font-weight: 600; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--crimson); margin-bottom: 1.2rem;
+}
+.story-hero-title {
+  font-family: var(--display); font-size: clamp(2.8rem, 4vw, 4.5rem);
+  font-weight: 300; line-height: 1.06; color: var(--paper);
+  margin-bottom: 1.5rem;
+}
+.story-hero-byline {
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.35); padding-top: 1.2rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.story-hero-img {
+  position: relative; overflow: hidden;
+}
+.story-hero-img img { width: 100%; height: 100%; object-fit: cover; }
+.story-hero-img.placeholder {
+  background: linear-gradient(145deg, var(--paper3), var(--rule));
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: .5rem;
+}
+
+.story-body-wrap { max-width: 1100px; margin: 0 auto; padding: 5rem 2rem; }
+.story-cols { display: grid; grid-template-columns: 1fr 340px; gap: 5rem; }
+.story-prose { }
+.story-drop-cap:first-child::first-letter {
+  font-family: var(--display); font-size: 5rem; font-weight: 700;
+  line-height: .75; float: left; margin: .05em .12em 0 0; color: var(--crimson);
+}
+.story-prose p {
+  font-family: var(--body-serif); font-size: 1.05rem; line-height: 1.9;
+  color: var(--ink2); margin-bottom: 1.6rem;
+}
+.story-prose p strong { color: var(--ink); font-weight: 700; }
+.story-pullquote {
+  border-top: 3px solid var(--crimson); border-bottom: 1px solid var(--rule);
+  padding: 2rem 0; margin: 3rem 0;
+}
+.story-pullquote blockquote {
+  font-family: var(--display); font-size: 2rem; font-style: italic;
+  font-weight: 400; color: var(--ink); line-height: 1.3;
+}
+
+/* Media inserts */
+.story-media-full { margin: 3rem 0; }
+.story-media-full img { width: 100%; border-radius: var(--radius-md); }
+.story-media-caption {
+  font-size: .72rem; color: var(--ink3); letter-spacing: .05em;
+  text-align: right; margin-top: .5rem;
+}
+
+.story-audio-player {
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--radius-md); padding: 1.5rem;
+  margin: 3rem 0;
+}
+.audio-label {
+  font-size: .65rem; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: .75rem;
+}
+.audio-controls { display: flex; align-items: center; gap: 14px; }
+.audio-play-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--crimson); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.audio-play-btn svg { width: 14px; height: 14px; fill: white; margin-left: 2px; }
+.audio-waveform { flex: 1; height: 36px; position: relative; overflow: hidden; }
+.audio-waveform canvas { width: 100%; height: 100%; }
+.audio-time { font-size: .75rem; color: rgba(255,255,255,.4); font-variant-numeric: tabular-nums; }
+
+.story-video-player {
+  margin: 3rem 0; border-radius: var(--radius-md); overflow: hidden;
+  aspect-ratio: 16/9; background: var(--ink); position: relative;
+}
+.story-video-player video { width: 100%; height: 100%; object-fit: cover; }
+.video-placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: .75rem;
+  background: linear-gradient(135deg, #1a1a18, #2e2e2a);
+  color: rgba(255,255,255,.35);
+}
+.video-placeholder-icon { font-size: 2.5rem; color: var(--crimson); }
+
+/* Story sidebar */
+.story-sidebar { }
+.sidebar-rule { border: none; border-top: 1px solid var(--rule); margin: 2rem 0; }
+.sidebar-label {
+  font-size: .62rem; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 1rem;
+}
+.generated-by-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .72rem; color: var(--ink3);
+  padding: 5px 10px; border: 1px solid var(--rule); border-radius: 100px;
+  margin-bottom: .5rem;
+}
+.generated-by-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+/* Music strip */
+.music-strip {
+  background: var(--paper2); border: 1px solid var(--rule);
+  border-radius: var(--radius-md); padding: 1rem;
+  display: flex; align-items: center; gap: 12px; margin: 3rem 0;
+}
+.music-icon { font-size: 1.5rem; }
+.music-info { flex: 1; }
+.music-title { font-size: .85rem; font-weight: 500; color: var(--ink); }
+.music-by { font-size: .72rem; color: var(--ink3); }
+.music-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--ink); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.music-btn svg { width: 10px; height: 10px; fill: white; margin-left: 2px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--ink); color: var(--paper);
+  padding: 10px 24px; border-radius: 100px;
+  font-size: .8rem; font-weight: 500; z-index: 900;
+  opacity: 0; transition: all .25s; pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Utility */
+.rule-header {
+  font-size: .65rem; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink3);
+  display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem;
+}
+.rule-header::after { content:''; flex:1; height:1px; background: var(--rule); }
+
+@media (max-width: 900px) {
+  .wizard-layout { grid-template-columns: 1fr; }
+  .wizard-sidebar { display: none; }
+  .story-hero { grid-template-columns: 1fr; }
+  .story-cols { grid-template-columns: 1fr; }
+  .provider-grid { grid-template-columns: 1fr; }
+  .story-grid { grid-template-columns: 1fr; }
+  .scard.featured, .scard.side, .scard.third { grid-column: span 1; }
+  .wizard-panel { padding: 2rem 1.5rem; }
+}
 </style>
-
 </head>
-
 <body>
 
-
-
-<nav>
-
-  <div class="nav-logo" onclick="showPage('feed')">
-
-    <div class="logo-mark"><svg viewBox="0 0 16 16"><path d="M8 1L9.8 5.8H15L10.6 8.7L12.4 13.5L8 10.6L3.6 13.5L5.4 8.7L1 5.8H6.2Z"/></svg></div>
-
-    Valor
-
+<!-- ── MASTHEAD ── -->
+<div class="masthead">
+  <div class="masthead-top">
+    <div class="masthead-logo" onclick="showPage('feed')">
+      <div class="logo-star"></div>
+      VALOR
+    </div>
+    <nav class="masthead-nav">
+      <button class="mnav-btn active" id="mnav-feed" onclick="showPage('feed')">Stories</button>
+      <button class="mnav-btn" id="mnav-create" onclick="showPage('create')">Create</button>
+    </nav>
+    <div class="masthead-right">
+      <div class="user-chip" id="user-chip" style="display:none">
+        <div class="user-avatar" id="user-avatar"><span id="user-initials"></span></div>
+        <span id="user-name-display"></span>
+      </div>
+      <button class="btn-ghost" id="auth-btn" onclick="handleAuth()">Sign In</button>
+    </div>
   </div>
-
-  <div class="nav-links">
-
-    <button class="nav-btn active" id="nav-feed" onclick="showPage('feed')">Stories</button>
-
-    <button class="nav-btn" id="nav-create" onclick="showPage('create')">Create</button>
-
-  </div>
-
-  <div class="nav-right">
-
-    <span class="nav-user" id="nav-user" style="display:none;"></span>
-
-    <button class="nav-cta" id="auth-btn" onclick="login()">Sign In with Google</button>
-
-  </div>
-
-</nav>
-
-
+</div>
 
 <div id="toast" class="toast"></div>
 
-
-
-<!-- ════════════ FEED PAGE ════════════ -->
-
+<!-- ══════════════════ FEED PAGE ══════════════════ -->
 <div class="page active" id="page-feed">
-
-  <div class="feed-hero">
-
-    <h1>Stories of <em>courage</em><br>that move the world</h1>
-
-    <p>A community that honors bravery. Create cinematic pages powered by Google AI Studio automatically.</p>
-
-    <div class="hero-btns">
-
-      <button class="btn-red" onclick="showPage('create')">Share Your Story</button>
-
-    </div>
-
+  <div class="feed-masthead-band">
+    <div class="feed-eyebrow">Est. 2025 · Community Archive</div>
+    <h1 class="feed-headline">Stories of <em>Courage</em><br>Worth Remembering</h1>
+    <p class="feed-subhead">A living magazine of bravery. Each story shaped by AI, authored by humans.</p>
+    <button class="feed-cta" onclick="showPage('create')">Submit Your Story</button>
   </div>
 
-  <div class="feed-wrap">
-
+  <div class="feed-container">
+    <div class="rule-header">Latest Dispatches</div>
     <div class="story-grid" id="story-grid">
-
-      <div style="text-align:center; grid-column:1/-1;">Scanning records...</div>
-
+      <div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--ink3);font-family:var(--body-serif);font-style:italic;">
+        Loading stories…
+      </div>
     </div>
-
   </div>
-
 </div>
 
-
-
-<!-- ════════════ CREATE PIPELINE ════════════ -->
-
+<!-- ══════════════════ CREATE WIZARD ══════════════════ -->
 <div class="page" id="page-create">
+  <div class="wizard-layout">
 
-  <div class="create-wrap">
-
-    <h2>Share Your Story</h2>
-
-    <p>We'll turn your words into a lasting, cinematic story page. Your Google account powers the AI automatically.</p>
-
-    
-
-    <div class="steps">
-
-      <div class="step-item on" id="si1"><div class="step-num">1</div> Write</div><div class="step-line"></div>
-
-      <div class="step-item" id="si2"><div class="step-num">2</div> Images</div><div class="step-line"></div>
-
-      <div class="step-item" id="si3"><div class="step-num">3</div> Video</div><div class="step-line"></div>
-
-      <div class="step-item" id="si4"><div class="step-num">4</div> Publish</div>
-
+    <!-- Sidebar steps -->
+    <div class="wizard-sidebar">
+      <div class="wizard-sidebar-title">Story Creator</div>
+      <div class="wizard-sidebar-sub">AI-Powered Pipeline</div>
+      <div class="wsteps" id="wsteps">
+        <!-- Populated by JS -->
+      </div>
     </div>
 
+    <!-- Main panels -->
+    <div class="wizard-main" id="wizard-main">
 
+      <!-- Step 1: Write -->
+      <div class="wizard-panel active" id="wp1">
+        <div class="wpanel-eyebrow">Step 1 of 7</div>
+        <h2 class="wpanel-title">Tell your story</h2>
+        <p class="wpanel-sub">Write freely. An AI script doctor will polish it into a compelling narrative in the next step.</p>
 
-    <!-- STEP 1 -->
+        <div class="field">
+          <label class="field-label">Story Title</label>
+          <input class="field-input" id="s-title" placeholder="Give your story a powerful headline…">
+        </div>
+        <div class="field">
+          <label class="field-label">Category</label>
+          <select class="field-input" id="s-cat">
+            <option>Military</option>
+            <option>Rescue</option>
+            <option>Everyday Heroes</option>
+            <option>Medical</option>
+            <option>Survival</option>
+            <option>Civil Rights</option>
+            <option>Environmental</option>
+            <option>Community</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Your Story (raw draft)</label>
+          <textarea class="field-input textarea" id="s-body" placeholder="Write your story here — don't worry about editing. Just tell us what happened, who was involved, and what made it remarkable. The AI will refine it."></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Tone</label>
+          <select class="field-input" id="s-tone">
+            <option>Inspiring & Uplifting</option>
+            <option>Journalistic & Factual</option>
+            <option>Emotional & Personal</option>
+            <option>Heroic & Dramatic</option>
+            <option>Reflective & Quiet</option>
+          </select>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn-next" onclick="goStep(2)">Choose AI Writer →</button>
+        </div>
+      </div>
 
-    <div id="cs1">
+      <!-- Step 2: AI Writer (Script Doctor) -->
+      <div class="wizard-panel" id="wp2">
+        <div class="wpanel-eyebrow">Step 2 of 7</div>
+        <h2 class="wpanel-title">Choose your Writer AI</h2>
+        <p class="wpanel-sub">Select an AI to act as your script doctor — rewriting your draft into a polished, magazine-ready narrative.</p>
 
-      <div class="provider-block">
+        <div class="provider-grid" id="pg-writer"></div>
+        <div id="cp-writer" class="connect-panel hidden"></div>
 
-        <div class="provider-default">
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-next" onclick="goStep(3)">Choose Image AI →</button>
+        </div>
+      </div>
 
-          <div class="provider-icon" style="background:#edf3fb;">✨</div>
+      <!-- Step 3: Image AI -->
+      <div class="wizard-panel" id="wp3">
+        <div class="wpanel-eyebrow">Step 3 of 7</div>
+        <h2 class="wpanel-title">Choose your Image AI</h2>
+        <p class="wpanel-sub">This AI will generate cinematic, story-relevant images from the keywords in your narrative.</p>
 
-          <div class="provider-text">
+        <div class="provider-grid" id="pg-image"></div>
+        <div id="cp-image" class="connect-panel hidden"></div>
 
-            <h4>Google Gemini <span class="rec-badge">Active</span></h4>
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-next" onclick="goStep(4)">Choose Video AI →</button>
+        </div>
+      </div>
 
-            <p>Your Google account automatically powers the AI design & formatting. No keys needed.</p>
+      <!-- Step 4: Video AI -->
+      <div class="wizard-panel" id="wp4">
+        <div class="wpanel-eyebrow">Step 4 of 7</div>
+        <h2 class="wpanel-title">Choose your Video AI</h2>
+        <p class="wpanel-sub">Generate a short cinematic video clip that opens your story page. You can skip this step.</p>
 
-          </div>
+        <div class="provider-grid" id="pg-video"></div>
+        <div id="cp-video" class="connect-panel hidden"></div>
 
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(3)">← Back</button>
+          <button class="btn-next" onclick="goStep(5)">Choose Voiceover AI →</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Voiceover AI -->
+      <div class="wizard-panel" id="wp5">
+        <div class="wpanel-eyebrow">Step 5 of 7</div>
+        <h2 class="wpanel-title">Choose your Voiceover AI</h2>
+        <p class="wpanel-sub">A voiceover AI will read your story aloud with an expressive, human-like voice. Optional but powerful.</p>
+
+        <div class="field">
+          <label class="field-label">Voice Style</label>
+          <select class="field-input" id="s-voice-style">
+            <option>Warm & Earnest</option>
+            <option>Deep & Authoritative</option>
+            <option>Soft & Reflective</option>
+            <option>News Anchor</option>
+            <option>Storyteller</option>
+          </select>
         </div>
 
+        <div class="provider-grid" id="pg-voice"></div>
+        <div id="cp-voice" class="connect-panel hidden"></div>
+
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(4)">← Back</button>
+          <button class="btn-next" onclick="goStep(6)">Choose Music AI →</button>
+        </div>
       </div>
 
+      <!-- Step 6: Music AI -->
+      <div class="wizard-panel" id="wp6">
+        <div class="wpanel-eyebrow">Step 6 of 7</div>
+        <h2 class="wpanel-title">Choose your Music AI</h2>
+        <p class="wpanel-sub">Generate a custom background score that matches the mood of your story. Optional.</p>
 
+        <div class="field">
+          <label class="field-label">Music Mood</label>
+          <select class="field-input" id="s-music-mood">
+            <option>Triumphant & Orchestral</option>
+            <option>Tender & Emotional</option>
+            <option>Tense & Dramatic</option>
+            <option>Peaceful & Reflective</option>
+            <option>Anthemic & Uplifting</option>
+          </select>
+        </div>
 
-      <div class="fsection"><label class="flabel">Story Title</label><input class="finput" id="s-title" placeholder="Give your story a powerful title..."></div>
+        <div class="provider-grid" id="pg-music"></div>
+        <div id="cp-music" class="connect-panel hidden"></div>
 
-      <div class="fsection"><label class="flabel">Category</label>
-
-        <select class="finput" id="s-cat">
-
-          <option>Military</option><option>Rescue</option><option>Everyday Heroes</option><option>Medical</option><option>Survival</option>
-
-        </select>
-
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(5)">← Back</button>
+          <button class="btn-next" onclick="goStep(7)">Review & Publish →</button>
+        </div>
       </div>
 
-      <div class="fsection">
+      <!-- Step 7: Publish -->
+      <div class="wizard-panel" id="wp7">
+        <div class="wpanel-eyebrow">Step 7 of 7</div>
+        <h2 class="wpanel-title">Review & Publish</h2>
+        <p class="wpanel-sub">Everything is set. Review your selections, then hit publish to generate your story.</p>
 
-        <label class="flabel">Your Story</label>
+        <div id="review-summary" style="margin-bottom: 2rem;"></div>
 
-        <textarea class="finput" id="s-body" placeholder="Tell us what happened. The AI will extract the visual keywords directly from your narrative..."></textarea>
-
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(6)">← Back</button>
+          <button class="btn-next publish" onclick="startPublish()">Publish Story →</button>
+        </div>
       </div>
-
-      <button class="gen-btn" onclick="goStep(2)">Continue to Images →</button>
-
     </div>
 
-
-
-    <!-- STEP 2 -->
-
-    <div id="cs2" class="hidden">
-
-      <div class="fsection">
-
-        <label class="flabel">Upload Images (Optional)</label>
-
-        <div class="upload-zone" onclick="document.getElementById('file-in').click()">
-
-          <div style="font-size:2rem;margin-bottom:.6rem;">🖼️</div>
-
-          <h4>Drop images here or let AI find them</h4>
-
-          <p>If you skip this, our engine will find context-aware photos automatically.</p>
-
-        </div>
-
-        <input type="file" id="file-in" accept="image/*" multiple style="display:none">
-
+    <!-- Generation progress (replaces main when generating) -->
+    <div class="gen-panel" id="gen-panel">
+      <div class="wpanel-eyebrow">Generating</div>
+      <h2 class="wpanel-title">Building your story…</h2>
+      <p class="wpanel-sub" style="margin-bottom:2rem;">Each AI is working on its part. This usually takes 30–90 seconds.</p>
+      <div id="gen-stages"></div>
+      <div id="gen-done-area" class="hidden" style="margin-top:2rem; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:1rem;">✦</div>
+        <h3 style="font-family:var(--display); font-size:2rem; margin-bottom:.5rem;">Your story is live.</h3>
+        <p style="color:var(--ink3); font-family:var(--body-serif); font-style:italic; margin-bottom:1.5rem;">Open it to read the finished cinematic page.</p>
+        <button class="btn-next" style="width:auto; padding:12px 32px;" onclick="viewCurrentStory()">Read My Story →</button>
       </div>
-
-      
-
-      <div style="display:flex;gap:10px;margin-top:1rem;">
-
-        <button class="back-btn" onclick="goStep(1)">← Back</button>
-
-        <button class="gen-btn" style="margin-top:1rem;" onclick="goStep(3)">Continue to Video →</button>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- STEP 3 -->
-
-    <div id="cs3" class="hidden">
-
-      <label class="flabel">AI Video Provider</label>
-
-      <div class="provider-block">
-
-        <div class="provider-default">
-
-          <div class="provider-icon" style="background:#edf7f2;">🎬</div>
-
-          <div class="provider-text">
-
-            <h4>Pika Labs <span class="rec-badge">Optional</span></h4>
-
-            <p>Paste your key below to automatically generate an AI video for this story.</p>
-
-          </div>
-
-        </div>
-
-        <div style="padding:0 1.5rem 1.5rem;">
-
-          <div class="key-row">
-
-            <label>Pika Labs API Key (Leave empty to skip)</label>
-
-            <input type="password" id="pika-key-input" placeholder="pk-xxxxxxxxxxxxxxxx" onchange="savePikaKey()">
-
-          </div>
-
-        </div>
-
-      </div>
-
-      
-
-      <div style="display:flex;gap:10px;margin-top:1.25rem;">
-
-        <button class="back-btn" onclick="goStep(2)">← Back</button>
-
-        <button class="gen-btn" style="margin-top:1rem;" onclick="startGenerate()">Generate & Publish →</button>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- STEP 4 -->
-
-    <div id="cs4" class="hidden">
-
-      <div class="gen-state" id="gen-running">
-
-        <div class="spinner"></div>
-
-        <h3 style="font-family:var(--serif);font-size:1.5rem;margin-bottom:.4rem;">Crafting your story</h3>
-
-        <p id="gen-status" style="color:var(--text2);font-size:.875rem;">Initializing AI engine...</p>
-
-        <div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div></div>
-
-      </div>
-
-      
-
-      <div class="done-card hidden" id="gen-done">
-
-        <div class="done-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" fill="none" stroke-width="2.5"/></svg></div>
-
-        <h3 style="font-family:var(--serif);font-size:1.85rem;margin-bottom:.4rem;">Your story is live!</h3>
-
-        <p style="color:var(--text2);margin-bottom:1.5rem;">The AI has successfully designed and formatted your narrative.</p>
-
-        <button class="gen-btn" style="width:auto;padding:11px 22px;" onclick="showPage('story')">View My Story</button>
-
-      </div>
-
     </div>
 
   </div>
-
 </div>
 
-
-
-<!-- ════════════ STORY VIEW ════════════ -->
-
+<!-- ══════════════════ STORY VIEW ══════════════════ -->
 <div class="page" id="page-story">
-
-  <div style="background:#0a0a0a; min-height:100vh;">
-
-    <div id="story-viewer"></div>
-
-  </div>
-
+  <div id="story-viewer"></div>
 </div>
 
-
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-
-
 <script>
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyBvkjzDzNMAh8JqWKT09AWIm0Gf11br0z0",
-
-  authDomain: "valor-92389.firebaseapp.com",
-
-  projectId: "valor-92389",
-
-  storageBucket: "valor-92389.firebasestorage.app",
-
-  messagingSenderId: "257185389808",
-
-  appId: "1:257185389808:web:f564b6fb9a86de5f3f7635"
-
-};
-
-firebase.initializeApp(firebaseConfig);
-
+// ══════ FIREBASE ══════
+const FB = { apiKey:"AIzaSyBvkjzDzNMAh8JqWKT09AWIm0Gf11br0z0", authDomain:"valor-92389.firebaseapp.com", projectId:"valor-92389", storageBucket:"valor-92389.firebasestorage.app", messagingSenderId:"257185389808", appId:"1:257185389808:web:f564b6fb9a86de5f3f7635" };
+firebase.initializeApp(FB);
 const auth = firebase.auth();
-
 const db = firebase.firestore();
 
+let currentUser = null;
+let googleToken = sessionStorage.getItem('valor_google_token') || null;
+let currentStory = null;
+let selections = { writer: null, image: null, video: null, voice: null, music: null };
 
+// ══════ PROVIDER REGISTRY ══════
+const PROVIDERS = {
+  writer: [
+    { id:'claude', name:'Claude', model:'claude-3-5-sonnet', icon:'🟠', bg:'#fff8f5', auth:'key', key:'anthropic_key', keyLabel:'Anthropic API Key', keyPlaceholder:'sk-ant-…', desc:'Exceptional narrative writing, deep tone control.', badges:['rec','key'], rec:true },
+    { id:'gpt4', name:'GPT-4o', model:'gpt-4o', icon:'🟢', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-…', desc:'World-class storytelling with rich style adaptation.', badges:['key'] },
+    { id:'gemini', name:'Gemini 1.5 Pro', model:'gemini-1.5-pro', icon:'🔵', bg:'#f5f8ff', auth:'oauth', oauthProvider:'google', desc:'Google\'s flagship model, great for descriptive prose.', badges:['oauth'] },
+    { id:'mistral', name:'Mistral Large', model:'mistral-large', icon:'🌊', bg:'#f5faff', auth:'key', key:'mistral_key', keyLabel:'Mistral API Key', keyPlaceholder:'…', desc:'Fast European model with strong creative writing.', badges:['key'] },
+    { id:'cohere', name:'Cohere Command R+', model:'command-r-plus', icon:'⚡', bg:'#fffaf5', auth:'key', key:'cohere_key', keyLabel:'Cohere API Key', keyPlaceholder:'…', desc:'Optimised for long-form content generation.', badges:['key'] },
+    { id:'llama', name:'Llama 3.1 405B', model:'llama-3.1-405b', icon:'🦙', bg:'#f8f5ff', auth:'key', key:'groq_key', keyLabel:'Groq API Key (for Llama)', keyPlaceholder:'gsk_…', desc:'Open-source powerhouse via Groq. Fast & free-tier.', badges:['key','free'] },
+  ],
+  image: [
+    { id:'dalle3', name:'DALL·E 3', model:'dall-e-3', icon:'🎨', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-…', desc:'Photorealistic images from detailed text prompts.', badges:['rec','key'], rec:true },
+    { id:'imagen3', name:'Imagen 3', model:'imagen-3', icon:'🖼️', bg:'#f5f8ff', auth:'oauth', oauthProvider:'google', desc:'Google\'s state-of-the-art photorealistic image generation.', badges:['oauth'] },
+    { id:'flux', name:'FLUX.1 Pro', model:'flux-pro', icon:'⚡', bg:'#fff5f8', auth:'key', key:'bfl_key', keyLabel:'Black Forest Labs API Key', keyPlaceholder:'…', desc:'Exceptional detail and realism. Current state of the art.', badges:['key'] },
+    { id:'sdxl', name:'Stable Diffusion XL', model:'sdxl', icon:'🌀', bg:'#f5f0ff', auth:'key', key:'stability_key', keyLabel:'Stability AI Key', keyPlaceholder:'sk-…', desc:'Highly customisable open model with style control.', badges:['key','free'] },
+    { id:'midjourney', name:'Midjourney', model:'v6', icon:'🌙', bg:'#f0f5ff', auth:'key', key:'mj_key', keyLabel:'Midjourney API Key (beta)', keyPlaceholder:'…', desc:'Stunning artistic image quality. Distinctive aesthetic.', badges:['key'] },
+    { id:'ideogram', name:'Ideogram 2.0', model:'ideogram-2', icon:'💎', bg:'#f5fff8', auth:'key', key:'ideogram_key', keyLabel:'Ideogram API Key', keyPlaceholder:'…', desc:'Great for text-in-image and stylised editorial looks.', badges:['key'] },
+  ],
+  video: [
+    { id:'skip', name:'Skip Video', model:'none', icon:'⏭️', bg:'#fafafa', auth:'none', desc:'No video generation. Story will use images only.', badges:[] },
+    { id:'sora', name:'Sora', model:'sora', icon:'🎬', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key (Sora access)', keyPlaceholder:'sk-…', desc:'OpenAI\'s video generation. High fidelity cinematic output.', badges:['rec','key'], rec:true },
+    { id:'runway', name:'Runway Gen-3 Alpha', model:'gen3', icon:'🛫', bg:'#f5f8ff', auth:'key', key:'runway_key', keyLabel:'Runway API Key', keyPlaceholder:'…', desc:'Leading text-to-video with strong motion quality.', badges:['key'] },
+    { id:'kling', name:'Kling 1.5', model:'kling-1.5', icon:'🌊', bg:'#f0f8ff', auth:'key', key:'kling_key', keyLabel:'Kling API Key', keyPlaceholder:'…', desc:'Exceptional realistic motion. Strong cinematic look.', badges:['key'] },
+    { id:'pika', name:'Pika 2.0', model:'pika-2', icon:'✨', bg:'#fff8f0', auth:'key', key:'pika_key', keyLabel:'Pika Labs API Key', keyPlaceholder:'pk-…', desc:'Fast, stylised video with great short-clip quality.', badges:['key'] },
+    { id:'hailuo', name:'Hailuo AI', model:'hailuo', icon:'🌸', bg:'#fff5f8', auth:'key', key:'hailuo_key', keyLabel:'Hailuo API Key', keyPlaceholder:'…', desc:'MiniMax\'s video model. Great realism for portraits.', badges:['key'] },
+    { id:'luma', name:'Luma Dream Machine', model:'dream-machine', icon:'🔮', bg:'#f8f5ff', auth:'key', key:'luma_key', keyLabel:'Luma AI API Key', keyPlaceholder:'…', desc:'Smooth dreamlike video with fluid camera motion.', badges:['key'] },
+  ],
+  voice: [
+    { id:'skip', name:'Skip Voiceover', model:'none', icon:'⏭️', bg:'#fafafa', auth:'none', desc:'No voiceover. Story will be text-only.', badges:[] },
+    { id:'elevenlabs', name:'ElevenLabs', model:'eleven_multilingual_v2', icon:'🎙️', bg:'#f5f8ff', auth:'key', key:'elevenlabs_key', keyLabel:'ElevenLabs API Key', keyPlaceholder:'xi-…', desc:'Industry-leading voice cloning and TTS quality.', badges:['rec','key'], rec:true },
+    { id:'openai-tts', name:'OpenAI TTS', model:'tts-1-hd', icon:'🔊', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-…', desc:'Natural, expressive voices. HD model for best quality.', badges:['key'] },
+    { id:'google-tts', name:'Google TTS', model:'wavenet', icon:'🎵', bg:'#f5f8ff', auth:'oauth', oauthProvider:'google', desc:'WaveNet voices with natural prosody via OAuth.', badges:['oauth'] },
+    { id:'playht', name:'PlayHT', model:'play3.0-mini', icon:'📻', bg:'#fff8f0', auth:'key', key:'playht_key', keyLabel:'PlayHT API Key', keyPlaceholder:'…', desc:'Ultra-realistic voices with great emotional range.', badges:['key'] },
+    { id:'murf', name:'Murf AI', model:'murf-v2', icon:'🎤', bg:'#f5fff5', auth:'key', key:'murf_key', keyLabel:'Murf API Key', keyPlaceholder:'…', desc:'Studio-grade voices for professional narration.', badges:['key'] },
+    { id:'resemble', name:'Resemble AI', model:'resemble-v2', icon:'🎭', bg:'#f8f5ff', auth:'key', key:'resemble_key', keyLabel:'Resemble API Key', keyPlaceholder:'…', desc:'Emotional voice synthesis with fine-grained control.', badges:['key'] },
+  ],
+  music: [
+    { id:'skip', name:'Skip Music', model:'none', icon:'⏭️', bg:'#fafafa', auth:'none', desc:'No background music.', badges:[] },
+    { id:'suno', name:'Suno v4', model:'suno-v4', icon:'🎼', bg:'#fff8f5', auth:'key', key:'suno_key', keyLabel:'Suno API Key', keyPlaceholder:'…', desc:'Full song generation with lyrics and orchestration.', badges:['rec','key'], rec:true },
+    { id:'udio', name:'Udio', model:'udio-v2', icon:'🎹', bg:'#f5f8ff', auth:'key', key:'udio_key', keyLabel:'Udio API Key', keyPlaceholder:'…', desc:'High-fidelity music generation across all genres.', badges:['key'] },
+    { id:'stable-audio', name:'Stable Audio 2.0', model:'stable-audio-2', icon:'🎸', bg:'#f8f5ff', auth:'key', key:'stability_key', keyLabel:'Stability AI Key', keyPlaceholder:'sk-…', desc:'Long-form audio generation optimised for score/ambient.', badges:['key'] },
+    { id:'musicgen', name:'Meta MusicGen', model:'musicgen-large', icon:'🎺', bg:'#f5fff8', auth:'key', key:'replicate_key', keyLabel:'Replicate API Key (MusicGen)', keyPlaceholder:'r8_…', desc:'Open-source music model via Replicate. Free-tier.', badges:['key','free'] },
+    { id:'beatoven', name:'Beatoven.ai', model:'beatoven-v2', icon:'🥁', bg:'#fff5f0', auth:'key', key:'beatoven_key', keyLabel:'Beatoven API Key', keyPlaceholder:'…', desc:'Royalty-free music tailored to mood and scene.', badges:['key'] },
+  ]
+};
 
-let googleToken = null;
+const STEP_META = [
+  { id:1, label:'Write', desc:'Title, story & tone', panel:'wp1' },
+  { id:2, label:'AI Writer', desc:'Script doctor selection', panel:'wp2' },
+  { id:3, label:'AI Images', desc:'Image generation', panel:'wp3' },
+  { id:4, label:'AI Video', desc:'Cinematic video clip', panel:'wp4' },
+  { id:5, label:'AI Voiceover', desc:'Narration selection', panel:'wp5' },
+  { id:6, label:'AI Music', desc:'Background score', panel:'wp6' },
+  { id:7, label:'Publish', desc:'Review & go live', panel:'wp7' },
+];
 
-let currentStoryData = null;
+let currentStep = 1;
 
-
-
-// AUTHENTICATION
+// ══════ INIT ══════
+function init() {
+  renderSidebar();
+  renderAllProviderGrids();
+  loadFeed();
+  loadSavedKeys();
+}
 
 auth.onAuthStateChanged(user => {
-
+  currentUser = user;
+  const chip = document.getElementById('user-chip');
   const btn = document.getElementById('auth-btn');
-
-  const nameEl = document.getElementById('nav-user');
-
-  
-
   if (user) {
-
-    nameEl.textContent = user.displayName || user.email;
-
-    nameEl.style.display = "";
-
+    chip.style.display = 'flex';
+    document.getElementById('user-name-display').textContent = user.displayName?.split(' ')[0] || 'You';
+    const initials = (user.displayName || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const av = document.getElementById('user-avatar');
+    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="">`;
+    else av.textContent = initials;
+    document.getElementById('user-initials').textContent = initials;
     btn.textContent = 'Sign Out';
-
-    btn.onclick = () => { auth.signOut(); googleToken = null; };
-
   } else {
-
-    nameEl.style.display = "none";
-
-    btn.textContent = 'Sign In with Google';
-
-    btn.onclick = login;
-
+    chip.style.display = 'none';
+    btn.textContent = 'Sign In';
   }
-
-  loadFeed();
-
-  loadPikaKey();
-
 });
 
-
+function handleAuth() {
+  if (currentUser) { auth.signOut(); googleToken = null; sessionStorage.removeItem('valor_google_token'); }
+  else login();
+}
 
 async function login() {
-
-  const provider = new firebase.auth.GoogleAuthProvider();
-
-  provider.addScope('https://www.googleapis.com/auth/generative-language');
-
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.addScope('https://www.googleapis.com/auth/generative-language');
+  p.addScope('https://www.googleapis.com/auth/cloud-platform');
   try {
-
-    const result = await auth.signInWithPopup(provider);
-
-    googleToken = result.credential.accessToken; // Critical for automatic Gemini
-
-    showToast("Signed in. AI Engine Active.");
-
-  } catch (e) {
-
-    showToast("Login failed.");
-
-  }
-
+    const r = await auth.signInWithPopup(p);
+    googleToken = r.credential.accessToken;
+    if (googleToken) sessionStorage.setItem('valor_google_token', googleToken);
+    showToast('Signed in ✓');
+    markOAuthConnected('google');
+  } catch(e) { showToast('Sign-in failed'); }
 }
 
-
-
-function savePikaKey() {
-
-  localStorage.setItem('valor_pika_key', document.getElementById('pika-key-input').value.trim());
-
+// ══════ SIDEBAR ══════
+function renderSidebar() {
+  const el = document.getElementById('wsteps');
+  el.innerHTML = STEP_META.map((s, i) => `
+    <div>
+      ${i > 0 ? '<div class="step-connector"></div>' : ''}
+      <div class="wstep ${s.id === 1 ? 'on' : ''}" id="wstep-${s.id}">
+        <div class="wstep-num">${s.id}</div>
+        <div>
+          <div class="wstep-label">${s.label}</div>
+          <div class="wstep-desc">${s.desc}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
-
-
-function loadPikaKey() {
-
-  const k = localStorage.getItem('valor_pika_key');
-
-  if(k) document.getElementById('pika-key-input').value = k;
-
+function updateSidebar(step) {
+  STEP_META.forEach(s => {
+    const el = document.getElementById('wstep-' + s.id);
+    if (!el) return;
+    el.className = 'wstep' + (s.id < step ? ' done' : s.id === step ? ' on' : '');
+    el.querySelector('.wstep-num').textContent = s.id < step ? '✓' : s.id;
+  });
 }
 
-
-
-// PIPELINE NAVIGATION
-
-function goStep(n) {
-
-  for(let i=1;i<=4;i++) {
-
-    document.getElementById('cs'+i).classList.add('hidden');
-
-    const s = document.getElementById('si'+i);
-
-    s.classList.remove('on','done');
-
-    if(i < n) s.classList.add('done');
-
-    else if(i === n) s.classList.add('on');
-
-  }
-
-  document.getElementById('cs'+n).classList.remove('hidden');
-
-  window.scrollTo(0,0);
-
+// ══════ PROVIDER GRIDS ══════
+function renderAllProviderGrids() {
+  Object.keys(PROVIDERS).forEach(task => {
+    renderProviderGrid(task);
+  });
 }
 
-
-
-// AI ENGINE (Contextual Theme & Keywords)
-
-async function callGemini(prompt) {
-
-  if (!googleToken) return null;
-
-  try {
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
-
-      method: 'POST',
-
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${googleToken}` },
-
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-
-    });
-
-    const data = await res.json();
-
-    return data.candidates[0].content.parts[0].text;
-
-  } catch (e) { return null; }
-
+function renderProviderGrid(task) {
+  const grid = document.getElementById('pg-' + task);
+  if (!grid) return;
+  grid.innerHTML = PROVIDERS[task].map(p => {
+    const badgeHtml = p.badges.map(b => {
+      const labels = { rec:'Recommended', oauth:'OAuth', key:'API Key', free:'Free Tier' };
+      const cls = { rec:'badge-rec', oauth:'badge-oauth', key:'badge-key', free:'badge-free' };
+      return `<span class="badge ${cls[b]}">${labels[b]}</span>`;
+    }).join('');
+    return `
+      <div class="provider-card" id="pc-${task}-${p.id}" onclick="selectProvider('${task}','${p.id}')">
+        <div class="pcard-check"><svg viewBox="0 0 12 10"><polyline points="1 5 4 8 11 1"/></svg></div>
+        <div class="pcard-top">
+          <div class="pcard-icon" style="background:${p.bg}">${p.icon}</div>
+          <div>
+            <div class="pcard-name">${p.name}</div>
+            <div class="pcard-model">${p.model}</div>
+          </div>
+        </div>
+        <div class="pcard-desc">${p.desc}</div>
+        <div class="pcard-badges">${badgeHtml}</div>
+      </div>
+    `;
+  }).join('');
 }
 
+function selectProvider(task, id) {
+  const prev = selections[task];
+  selections[task] = id;
 
+  // Deselect all in grid
+  document.querySelectorAll(`#pg-${task} .provider-card`).forEach(el => el.classList.remove('selected'));
+  const card = document.getElementById(`pc-${task}-${id}`);
+  if (card) card.classList.add('selected');
 
-function getLocalKeywords(text) {
+  const p = PROVIDERS[task].find(x => x.id === id);
+  if (!p) return;
 
-  const noise = ['there','about','would','could','should','after','where','under','while','their'];
+  const cp = document.getElementById('cp-' + task);
+  if (!cp) return;
 
-  const words = text.toLowerCase().split(/\W+/).filter(w => w.length > 5 && !noise.includes(w));
+  if (id === 'skip' || p.auth === 'none') { cp.classList.add('hidden'); return; }
 
-  return [...new Set(words)].slice(0, 4);
-
-}
-
-
-
-async function startGenerate() {
-
-  if (!auth.currentUser) {
-
-    showToast("Please sign in with Google first to publish.");
-
+  // Check if already connected
+  const storedKey = localStorage.getItem('valor_' + p.key);
+  const oauthConnected = p.auth === 'oauth' && isOAuthConnected(p.oauthProvider);
+  if (storedKey || oauthConnected) {
+    cp.innerHTML = `<div class="connected-status"><div class="status-dot"></div>${p.name} connected ✓${storedKey ? ' (API Key)' : ' (OAuth)'}</div>`;
+    cp.classList.remove('hidden');
+    card.classList.add('connected');
     return;
-
   }
 
-  const title = document.getElementById('s-title').value.trim();
-
-  const body = document.getElementById('s-body').value.trim();
-
-  const category = document.getElementById('s-cat').value;
-
-
-
-  if (!title || !body) { showToast("Story details are missing."); goStep(1); return; }
-
-
-
-  goStep(4);
-
-  const fill = document.getElementById('prog-fill');
-
-  const status = document.getElementById('gen-status');
-
-  
-
-  // Fake Progress UI
-
-  let pct = 0;
-
-  const iv = setInterval(() => {
-
-    pct = Math.min(pct + 5, 90);
-
-    fill.style.width = pct + '%';
-
-  }, 300);
-
-
-
-  status.textContent = "Extracting visual keywords...";
-
-  
-
-  let queries = [];
-
-  let pullQuote = body.split(/[.!?]/)[0] + ".";
-
-
-
-  if (googleToken) {
-
-    const prompt = `Act as Valor Editor. Extract 4 specific visual keywords (nouns/equipment) from the text. 
-
-    Return JSON ONLY: {"queries":["keyword1","keyword2","keyword3","keyword4"],"pullQuote":"one powerful sentence"}.
-
-    Story: ${title} - ${body.substring(0,500)}`;
-
-    
-
-    const raw = await callGemini(prompt);
-
-    if (raw) {
-
-      try {
-
-        const ai = JSON.parse(raw.replace(/```json|```/g, ""));
-
-        queries = ai.queries || [];
-
-        pullQuote = ai.pullQuote || pullQuote;
-
-      } catch(e) { queries = getLocalKeywords(body); }
-
-    } else {
-
-      queries = getLocalKeywords(body);
-
-    }
-
+  // Show connect UI
+  cp.classList.remove('hidden');
+  if (p.auth === 'oauth') {
+    cp.innerHTML = `
+      <h4>Connect with ${p.name}</h4>
+      <p>Sign in with your ${p.oauthProvider === 'google' ? 'Google' : p.name} account. No API key needed.</p>
+      <button class="btn-oauth" onclick="doOAuth('${p.oauthProvider}','${task}','${id}')">
+        ${p.oauthProvider === 'google' ? '🔵' : '🔗'} Sign in with ${p.oauthProvider === 'google' ? 'Google' : p.name}
+      </button>
+    `;
   } else {
-
-    queries = getLocalKeywords(body);
-
+    cp.innerHTML = `
+      <h4>${p.keyLabel}</h4>
+      <p>Your key is stored locally in your browser and never sent to our servers — only used for direct API calls.</p>
+      <div class="key-input-row">
+        <input type="password" id="ki-${task}" placeholder="${p.keyPlaceholder}" value="${storedKey||''}">
+        <button class="btn-connect" onclick="saveKey('${p.key}','${task}','${id}')">Connect</button>
+      </div>
+    `;
   }
-
-
-
-  // STATIC VALOR THEME (Overriding previous military rules)
-
-  const design = {
-
-    bg: "#0a0a0a", 
-
-    accent: "#c0392b", 
-
-    queries: queries.length > 0 ? queries : [category, "bravery"],
-
-    pullQuote: pullQuote
-
-  };
-
-
-
-  status.textContent = "Publishing story...";
-
-  clearInterval(iv);
-
-  fill.style.width = '100%';
-
-
-
-  try {
-
-    const docRef = await db.collection('stories').add({
-
-      title, body, category, design,
-
-      author: auth.currentUser.displayName, 
-
-      uid: auth.currentUser.uid,
-
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-
-    });
-
-    
-
-    // Setup View state
-
-    currentStoryData = { id: docRef.id, title, body, category, design, author: auth.currentUser.displayName };
-
-    
-
-    setTimeout(() => {
-
-      document.getElementById('gen-running').classList.add('hidden');
-
-      document.getElementById('gen-done').classList.remove('hidden');
-
-      document.getElementById('si4').classList.add('on');
-
-    }, 500);
-
-
-
-  } catch (e) { 
-
-    showToast("Error saving story."); 
-
-    goStep(1); 
-
-  }
-
 }
 
-
-
-// FEED & RENDERING
-
-async function loadFeed() {
-
-  const grid = document.getElementById('story-grid');
-
-  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Scanning records...</div>';
-
-  try {
-
-    const snap = await db.collection('stories').orderBy('createdAt', 'desc').get();
-
-    grid.innerHTML = '';
-
-    snap.forEach(doc => {
-
-      const s = doc.data();
-
-      const d = s.design || { bg: "#0a0a0a", accent: "#c0392b", queries: ["bravery"] };
-
-      const div = document.createElement('div');
-
-      div.className = 'scard';
-
-      div.onclick = () => { currentStoryData = s; viewStory(); };
-
-      const q = d.queries.join(",");
-
-      div.innerHTML = `
-
-        <div class="scard-img" style="background:${d.bg}">
-
-          <img src="https://loremflickr.com/800/600/${q}/all" loading="lazy" alt="">
-
-          <div class="cat-tag" style="background:${d.accent}">${s.category}</div>
-
-        </div>
-
-        <div class="scard-body">
-
-          <h3 class="scard-title">${s.title}</h3>
-
-          <p style="font-size:.85rem;color:var(--text2);">${s.body.substring(0, 90)}...</p>
-
-        </div>
-
-      `;
-
-      grid.appendChild(div);
-
-    });
-
-  } catch(e) { grid.innerHTML = 'Sign in to see stories.'; }
-
+function saveKey(keyName, task, id) {
+  const val = (document.getElementById('ki-' + task) || {}).value?.trim();
+  if (!val) { showToast('Please enter a valid key'); return; }
+  localStorage.setItem('valor_' + keyName, val);
+  const cp = document.getElementById('cp-' + task);
+  const p = PROVIDERS[task].find(x => x.id === id);
+  cp.innerHTML = `<div class="connected-status"><div class="status-dot"></div>${p.name} connected ✓ (API Key saved)</div>`;
+  document.getElementById(`pc-${task}-${id}`)?.classList.add('connected');
+  showToast('Key saved locally ✓');
 }
 
+function loadSavedKeys() {
+  // Pre-mark connected cards based on stored keys
+  Object.keys(PROVIDERS).forEach(task => {
+    PROVIDERS[task].forEach(p => {
+      if (p.auth === 'key' && localStorage.getItem('valor_' + p.key)) {
+        document.getElementById(`pc-${task}-${p.id}`)?.classList.add('connected');
+      }
+    });
+  });
+}
 
+async function doOAuth(provider, task, id) {
+  if (provider === 'google') {
+    await login();
+    if (googleToken) {
+      markOAuthConnected('google');
+      selectProvider(task, id); // re-render connect panel
+    }
+  }
+}
 
-function viewStory() {
+function isOAuthConnected(provider) {
+  if (provider === 'google') return !!googleToken;
+  return false;
+}
 
-  if (!currentStoryData) return;
+function markOAuthConnected(provider) {
+  // Re-render any selected google oauth provider cards
+  Object.keys(PROVIDERS).forEach(task => {
+    const sel = selections[task];
+    if (!sel) return;
+    const p = PROVIDERS[task].find(x => x.id === sel);
+    if (p?.auth === 'oauth' && p?.oauthProvider === provider) {
+      selectProvider(task, sel);
+    }
+  });
+}
 
-  const s = currentStoryData;
+// ══════ STEP NAVIGATION ══════
+function goStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('wp' + n)?.classList.add('active');
+  updateSidebar(n);
+  if (n === 7) renderReview();
+  document.querySelector('.wizard-main')?.scrollTo(0, 0);
+  window.scrollTo(0,0);
+}
 
-  const d = s.design || { bg: "#0a0a0a", accent: "#c0392b", queries: ["hero"], pullQuote: "" };
-
-  const viewer = document.getElementById('story-viewer');
-
-  showPage('story');
-
-
-
-  const paragraphs = s.body.split('\n').filter(p => p.trim()).map((p, i) => {
-
-    if (i === 0) return `<p class="hook">${p}</p>`;
-
-    const words = p.split(' ');
-
-    return `<p><strong>${words.slice(0, 3).join(' ')}</strong> ${words.slice(3).join(' ')}</p>`;
-
+function renderReview() {
+  const taskLabels = { writer:'AI Writer', image:'AI Images', video:'AI Video', voice:'AI Voiceover', music:'AI Music' };
+  const html = Object.entries(selections).map(([task, id]) => {
+    if (!id) return `<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--rule);font-size:.85rem;"><span style="color:var(--ink3)">${taskLabels[task]}</span><span style="color:var(--crimson)">Not selected</span></div>`;
+    const p = PROVIDERS[task]?.find(x => x.id === id);
+    const name = p ? `${p.icon} ${p.name}` : id;
+    return `<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--rule);font-size:.85rem;"><span style="color:var(--ink3)">${taskLabels[task]}</span><span style="font-weight:500;">${name}</span></div>`;
   }).join('');
 
-
-
-  const q = (d.queries || ["bravery"]).join(',');
-
-  const pikaKey = localStorage.getItem('valor_pika_key');
-
-
-
-  viewer.innerHTML = `
-
-    <div class="sp-hero">
-
-      <div class="sp-hero-bg" style="background-image: url('https://loremflickr.com/1200/800/${q}/all');"></div>
-
-      <div class="sp-hero-overlay"></div>
-
-      <div class="sp-hero-content">
-
-        <h1 class="sp-title">${s.title}</h1>
-
-        <div style="font-size:0.9rem; color:#aaa; text-transform:uppercase; letter-spacing:2px;">${s.category} — By ${s.author}</div>
-
-      </div>
-
+  const title = document.getElementById('s-title')?.value || '(untitled)';
+  document.getElementById('review-summary').innerHTML = `
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:var(--radius-md);padding:1.5rem;margin-bottom:1.5rem;">
+      <div style="font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem;">Story</div>
+      <div style="font-family:var(--display);font-size:1.5rem;">${title}</div>
+      <div style="font-size:.78rem;color:var(--ink3);margin-top:.25rem;">${document.getElementById('s-cat')?.value} · ${document.getElementById('s-tone')?.value}</div>
     </div>
-
-    
-
-    <div class="sp-body">
-
-      <div class="sp-prose">${paragraphs}</div>
-
-      <div class="sp-pullquote">
-
-        <blockquote>"${d.pullQuote}"</blockquote>
-
-      </div>
-
-
-
-      <div class="sp-video-box" onclick="showToast('${pikaKey ? 'Sending to Pika Labs API...' : 'Add Pika key in create steps to generate'}')">
-
-        <div class="sp-video-placeholder">
-
-          <div style="font-size: 3rem; color:${d.accent};">▶</div>
-
-          <div style="font-weight:900; text-transform:uppercase; letter-spacing:2px;">AI Cinematic Video</div>
-
-          <p style="font-size:0.7rem; opacity:0.5;">Prompt derived from keywords: ${q}</p>
-
-        </div>
-
-      </div>
-
-
-
-      <div class="sp-mosaic">
-
-        <div class="sp-mosaic-img"><img src="https://loremflickr.com/800/800/${d.queries[0]||'brave'}/all"></div>
-
-        <div class="sp-mosaic-col">
-
-          <div class="sp-mosaic-img"><img src="https://loremflickr.com/400/400/${d.queries[1]||'hero'}/all"></div>
-
-          <div class="sp-mosaic-img"><img src="https://loremflickr.com/400/400/${d.queries[2]||'valor'}/all"></div>
-
-        </div>
-
-      </div>
-
-    </div>
-
+    <div>${html}</div>
   `;
-
 }
 
+// ══════ GENERATION ENGINE ══════
+async function startPublish() {
+  if (!currentUser) { showToast('Please sign in to publish'); login(); return; }
+  const title = document.getElementById('s-title').value.trim();
+  const body = document.getElementById('s-body').value.trim();
+  if (!title || !body) { showToast('Title and story are required'); goStep(1); return; }
 
+  // Switch to generation view
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('gen-panel').classList.add('active');
+  document.getElementById('gen-done-area').classList.add('hidden');
 
-// UTILITIES
+  const tasks = [
+    { id:'write', label:'Script Doctor', desc:'Polishing your narrative…', icon:'✍️', fn: () => runWriter(title, body) },
+    { id:'image', label:'Image Generation', desc:'Creating cinematic visuals…', icon:'🖼️', fn: runImageGen },
+    { id:'video', label:'Video Generation', desc:'Composing cinematic clip…', icon:'🎬', fn: runVideoGen },
+    { id:'voice', label:'Voiceover', desc:'Recording narration…', icon:'🎙️', fn: runVoiceGen },
+    { id:'music', label:'Background Music', desc:'Composing score…', icon:'🎼', fn: runMusicGen },
+    { id:'publish', label:'Publishing', desc:'Saving to Valor…', icon:'📡', fn: () => publishStory(title, body) },
+  ];
 
-function showPage(id) {
+  const stagesEl = document.getElementById('gen-stages');
+  stagesEl.innerHTML = tasks.map(t => `
+    <div class="gen-stage" id="gs-${t.id}">
+      <div class="stage-icon">${t.icon}</div>
+      <div style="flex:1"><div class="stage-name">${t.label}</div><div class="stage-status" id="gss-${t.id}">Waiting…</div></div>
+    </div>
+  `).join('');
 
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-  document.getElementById('page-' + id).classList.add('active');
-
-  const btn = document.getElementById('nav-' + id);
-
-  if (btn) btn.classList.add('active');
-
-  
-
-  if (id === 'create') {
-
-    document.getElementById('gen-running').classList.remove('hidden');
-
-    document.getElementById('gen-done').classList.add('hidden');
-
-    goStep(1);
-
+  const results = {};
+  for (const task of tasks) {
+    setStage(task.id, 'running', task.desc);
+    try {
+      results[task.id] = await task.fn(results);
+      setStage(task.id, 'done', 'Complete ✓');
+    } catch(e) {
+      setStage(task.id, 'error', e.message || 'Failed');
+      console.error(task.id, e);
+    }
   }
 
-  window.scrollTo(0,0);
-
+  document.getElementById('gen-done-area').classList.remove('hidden');
 }
 
+function setStage(id, state, msg) {
+  const el = document.getElementById('gs-' + id);
+  const st = document.getElementById('gss-' + id);
+  if (!el || !st) return;
+  el.className = 'gen-stage ' + state;
+  st.textContent = msg;
+  // spinner
+  const existing = el.querySelector('.stage-spin, .stage-tick');
+  if (existing) existing.remove();
+  if (state === 'running') {
+    const s = document.createElement('div'); s.className='stage-spin'; el.appendChild(s);
+  } else if (state === 'done') {
+    const t = document.createElement('div'); t.className='stage-tick'; t.textContent='✓'; el.appendChild(t);
+  }
+}
 
+// ── AI CALLS ──
+
+async function runWriter(title, rawBody, results) {
+  const writerSel = selections.writer;
+  if (!writerSel) { return { text: rawBody }; }
+  const p = PROVIDERS.writer.find(x => x.id === writerSel);
+  const tone = document.getElementById('s-tone').value;
+  const category = document.getElementById('s-cat').value;
+  const prompt = `You are a seasoned magazine script doctor working for Valor, an editorial about human courage.\n\nRewrite the following raw story draft into a polished, compelling narrative for a ${category} story with a ${tone} tone.\n\nRequirements:\n- 4-6 well-crafted paragraphs\n- Open with a powerful hook sentence\n- Include vivid sensory details\n- Extract and include one pull-quote worthy sentence\n- Maintain the true facts of the story\n- Write in second-person perspective about the subject\n\nReturn JSON ONLY: { "headline": "refined headline", "pullQuote": "one memorable sentence", "paragraphs": ["para1","para2","para3","para4"], "keywords": ["keyword1","keyword2","keyword3","keyword4"] }\n\nRaw story: ${title}\n\n${rawBody}`;
+
+  let raw = null;
+
+  if (writerSel === 'claude') {
+    const key = localStorage.getItem('valor_anthropic_key');
+    if (!key) return { text: rawBody };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'x-api-key': key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model:'claude-3-5-sonnet-20241022', max_tokens:1500, messages:[{ role:'user', content: prompt }] })
+    });
+    const data = await res.json();
+    raw = data.content?.[0]?.text;
+
+  } else if (writerSel === 'gpt4') {
+    const key = localStorage.getItem('valor_openai_key');
+    if (!key) return { text: rawBody };
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key },
+      body: JSON.stringify({ model:'gpt-4o', messages:[{ role:'user', content: prompt }], max_tokens:1500 })
+    });
+    const data = await res.json();
+    raw = data.choices?.[0]?.message?.content;
+
+  } else if (writerSel === 'gemini') {
+    if (!googleToken) return { text: rawBody };
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + googleToken },
+      body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  }
+
+  if (raw) {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      try { return JSON.parse(match[0]); } catch(e) {}
+    }
+  }
+  // Fallback: local keyword extraction
+  return { text: rawBody, paragraphs: rawBody.split('\n').filter(Boolean), keywords: rawBody.toLowerCase().split(/\W+/).filter(w=>w.length>5).slice(0,4) };
+}
+
+async function runImageGen(results) {
+  const imgSel = selections.image;
+  const keywords = results?.write?.keywords || ['hero','courage','valor','bravery'];
+  const prompt = `Cinematic editorial photograph: ${keywords.join(', ')}. Magazine quality, dramatic lighting, photorealistic.`;
+
+  if (imgSel === 'skip' || !imgSel) return { url: null };
+
+  if (imgSel === 'dalle3') {
+    const key = localStorage.getItem('valor_openai_key');
+    if (!key) return { url: null };
+    const res = await fetch('https://api.openai.com/v1/images/generations', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key },
+      body: JSON.stringify({ model:'dall-e-3', prompt, n:1, size:'1792x1024', quality:'hd' })
+    });
+    const data = await res.json();
+    return { url: data.data?.[0]?.url || null };
+  }
+
+  if (imgSel === 'flux') {
+    const key = localStorage.getItem('valor_bfl_key');
+    if (!key) return { url: null };
+    const res = await fetch('https://api.bfl.ml/v1/flux-pro-1.1', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-Key': key },
+      body: JSON.stringify({ prompt, width:1440, height:816 })
+    });
+    const data = await res.json();
+    // FLUX is async — poll for result
+    if (data.id) {
+      for (let i=0; i<20; i++) {
+        await delay(3000);
+        const poll = await fetch(`https://api.bfl.ml/v1/get_result?id=${data.id}`, { headers:{'X-Key':key} });
+        const r = await poll.json();
+        if (r.status === 'Ready') return { url: r.result?.sample || null };
+      }
+    }
+    return { url: null };
+  }
+
+  if (imgSel === 'sdxl') {
+    const key = localStorage.getItem('valor_stability_key');
+    if (!key) return { url: null };
+    const res = await fetch('https://api.stability.ai/v2beta/stable-image/generate/ultra', {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer ' + key, 'Accept':'application/json' },
+      body: (() => { const f=new FormData(); f.append('prompt',prompt); f.append('output_format','jpeg'); return f; })()
+    });
+    const data = await res.json();
+    return { url: data.image ? 'data:image/jpeg;base64,' + data.image : null };
+  }
+
+  // Other providers: return null (would need their specific APIs)
+  return { url: null };
+}
+
+async function runVideoGen(results) {
+  const vidSel = selections.video;
+  if (vidSel === 'skip' || !vidSel) return { url: null };
+
+  const keywords = results?.write?.keywords || ['hero','bravery'];
+  const prompt = `Cinematic short video: ${keywords.join(', ')}. Dramatic lighting, documentary style, emotional.`;
+
+  if (vidSel === 'runway') {
+    const key = localStorage.getItem('valor_runway_key');
+    if (!key) return { url: null };
+    // Runway Gen-3 API
+    const res = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key, 'X-Runway-Version':'2024-11-06' },
+      body: JSON.stringify({ model:'gen3a_turbo', promptText: prompt, duration:5, ratio:'1280:768' })
+    });
+    const data = await res.json();
+    if (data.id) {
+      for (let i=0; i<30; i++) {
+        await delay(5000);
+        const poll = await fetch(`https://api.dev.runwayml.com/v1/tasks/${data.id}`, { headers:{'Authorization':'Bearer '+key,'X-Runway-Version':'2024-11-06'} });
+        const r = await poll.json();
+        if (r.status === 'SUCCEEDED') return { url: r.output?.[0] || null };
+        if (r.status === 'FAILED') return { url: null };
+      }
+    }
+    return { url: null };
+  }
+
+  if (vidSel === 'pika') {
+    const key = localStorage.getItem('valor_pika_key');
+    if (!key) return { url: null };
+    const res = await fetch('https://api.pika.art/v1/generate', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key },
+      body: JSON.stringify({ prompt, duration:4, aspectRatio:'16:9' })
+    });
+    const data = await res.json();
+    return { url: data.video?.url || null };
+  }
+
+  return { url: null };
+}
+
+async function runVoiceGen(results) {
+  const voiceSel = selections.voice;
+  if (voiceSel === 'skip' || !voiceSel) return { url: null };
+
+  const paragraphs = results?.write?.paragraphs || [];
+  const text = paragraphs.slice(0,2).join(' ');
+  if (!text) return { url: null };
+
+  if (voiceSel === 'elevenlabs') {
+    const key = localStorage.getItem('valor_elevenlabs_key');
+    if (!key) return { url: null };
+    // Use a default voice id (Rachel)
+    const voiceId = 'EXAVITQu4vr4xnSDxMaL';
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'xi-api-key': key },
+      body: JSON.stringify({ text, model_id:'eleven_multilingual_v2', voice_settings:{ stability:.5, similarity_boost:.85 } })
+    });
+    if (res.ok) {
+      const blob = await res.blob();
+      return { url: URL.createObjectURL(blob), type:'blob' };
+    }
+    return { url: null };
+  }
+
+  if (voiceSel === 'openai-tts') {
+    const key = localStorage.getItem('valor_openai_key');
+    if (!key) return { url: null };
+    const style = document.getElementById('s-voice-style').value;
+    const voiceMap = { 'Warm & Earnest':'nova', 'Deep & Authoritative':'onyx', 'Soft & Reflective':'shimmer', 'News Anchor':'echo', 'Storyteller':'alloy' };
+    const res = await fetch('https://api.openai.com/v1/audio/speech', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key },
+      body: JSON.stringify({ model:'tts-1-hd', input: text, voice: voiceMap[style] || 'nova' })
+    });
+    if (res.ok) {
+      const blob = await res.blob();
+      return { url: URL.createObjectURL(blob), type:'blob' };
+    }
+    return { url: null };
+  }
+
+  return { url: null };
+}
+
+async function runMusicGen(results) {
+  const musicSel = selections.music;
+  if (musicSel === 'skip' || !musicSel) return { url: null };
+
+  if (musicSel === 'suno') {
+    const key = localStorage.getItem('valor_suno_key');
+    if (!key) return { url: null };
+    const mood = document.getElementById('s-music-mood').value;
+    const res = await fetch('https://apibox.erweima.ai/api/v1/generate', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key },
+      body: JSON.stringify({ prompt: `${mood} instrumental background score for a documentary story, no lyrics`, make_instrumental: true, wait_audio: false })
+    });
+    const data = await res.json();
+    if (data.data?.[0]?.id) {
+      for (let i=0; i<20; i++) {
+        await delay(5000);
+        const poll = await fetch(`https://apibox.erweima.ai/api/v1/get?ids=${data.data[0].id}`, { headers:{'Authorization':'Bearer '+key} });
+        const r = await poll.json();
+        const track = r.data?.[0];
+        if (track?.status === 'complete') return { url: track.audio_url, title: track.title };
+      }
+    }
+    return { url: null };
+  }
+
+  if (musicSel === 'stable-audio') {
+    const key = localStorage.getItem('valor_stability_key');
+    if (!key) return { url: null };
+    const mood = document.getElementById('s-music-mood').value;
+    const res = await fetch('https://api.stability.ai/v2beta/audio/stable-audio/text-to-audio', {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer ' + key, 'Accept':'application/json' },
+      body: (() => { const f=new FormData(); f.append('prompt', `${mood} instrumental score`); f.append('duration', '45'); f.append('output_format','mp3'); return f; })()
+    });
+    if (res.ok) {
+      const blob = await res.blob();
+      return { url: URL.createObjectURL(blob), type:'blob' };
+    }
+    return { url: null };
+  }
+
+  return { url: null };
+}
+
+async function publishStory(title, rawBody, results) {
+  // results is passed by the engine loop
+  return;
+}
+
+// Patched: the engine loop passes results through
+// Rebuild loop to pass results forward
+async function startPublish() {
+  if (!currentUser) { showToast('Please sign in to publish'); login(); return; }
+  const title = document.getElementById('s-title').value.trim();
+  const body = document.getElementById('s-body').value.trim();
+  const category = document.getElementById('s-cat').value;
+  const tone = document.getElementById('s-tone').value;
+  if (!title || !body) { showToast('Title and story are required'); goStep(1); return; }
+
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('gen-panel').classList.add('active');
+  document.getElementById('gen-done-area').classList.add('hidden');
+
+  const tasks = [
+    { id:'write',   label:'Script Doctor',     desc:'Polishing your narrative…',    icon:'✍️' },
+    { id:'image',   label:'Image Generation',  desc:'Creating cinematic visuals…',  icon:'🖼️' },
+    { id:'video',   label:'Video Generation',  desc:'Composing cinematic clip…',    icon:'🎬' },
+    { id:'voice',   label:'Voiceover',          desc:'Recording narration…',         icon:'🎙️' },
+    { id:'music',   label:'Background Music',   desc:'Composing score…',             icon:'🎼' },
+    { id:'publish', label:'Publishing',         desc:'Saving to Valor…',             icon:'📡' },
+  ];
+
+  const stagesEl = document.getElementById('gen-stages');
+  stagesEl.innerHTML = tasks.map(t => `
+    <div class="gen-stage" id="gs-${t.id}">
+      <div class="stage-icon">${t.icon}</div>
+      <div style="flex:1"><div class="stage-name">${t.label}</div><div class="stage-status" id="gss-${t.id}">Waiting…</div></div>
+    </div>
+  `).join('');
+
+  const R = {};
+
+  setStage('write','running','Polishing your narrative…');
+  try { R.write = await runWriter(title, body); setStage('write','done','Complete ✓'); }
+  catch(e){ setStage('write','error','Failed — using raw text'); R.write = { paragraphs:[body], keywords:['hero','courage'] }; }
+
+  setStage('image','running','Generating images…');
+  try { R.image = await runImageGen(R); setStage('image','done','Complete ✓'); }
+  catch(e){ setStage('image','error','Failed'); R.image = { url: null }; }
+
+  setStage('video','running','Composing cinematic clip…');
+  try { R.video = await runVideoGen(R); setStage('video','done', R.video.url ? 'Complete ✓' : 'Skipped'); }
+  catch(e){ setStage('video','error','Failed'); R.video = { url: null }; }
+
+  setStage('voice','running','Recording narration…');
+  try { R.voice = await runVoiceGen(R); setStage('voice','done', R.voice.url ? 'Complete ✓' : 'Skipped'); }
+  catch(e){ setStage('voice','error','Failed'); R.voice = { url: null }; }
+
+  setStage('music','running','Composing score…');
+  try { R.music = await runMusicGen(R); setStage('music','done', R.music.url ? 'Complete ✓' : 'Skipped'); }
+  catch(e){ setStage('music','error','Failed'); R.music = { url: null }; }
+
+  setStage('publish','running','Saving to Valor…');
+  try {
+    const headline = R.write?.headline || title;
+    const keywords = R.write?.keywords || ['valor'];
+    const pullQuote = R.write?.pullQuote || '';
+    const paragraphs = R.write?.paragraphs || [body];
+    const storyData = {
+      title: headline, rawTitle: title, body, category, tone,
+      paragraphs, pullQuote, keywords,
+      imageUrl: R.image?.url || null,
+      videoUrl: R.video?.url || null,
+      voiceUrl: R.voice?.url || null,
+      musicUrl: R.music?.url || null,
+      musicTitle: R.music?.title || null,
+      providers: { ...selections },
+      author: currentUser.displayName, uid: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    const ref = await db.collection('stories').add(storyData);
+    currentStory = { id: ref.id, ...storyData };
+    setStage('publish','done','Published ✓');
+    loadFeed();
+  } catch(e){ setStage('publish','error','Save failed'); }
+
+  document.getElementById('gen-done-area').classList.remove('hidden');
+}
+
+// ══════ FEED ══════
+async function loadFeed() {
+  const grid = document.getElementById('story-grid');
+  if (!grid) return;
+  try {
+    const snap = await db.collection('stories').orderBy('createdAt','desc').limit(12).get();
+    if (snap.empty) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--ink3);font-family:var(--body-serif);font-style:italic;">No stories yet. Be the first to share one.</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    let i = 0;
+    snap.forEach(doc => {
+      const s = doc.data();
+      const cls = i === 0 ? 'featured' : i === 1 ? 'side' : 'third';
+      const imgSrc = s.imageUrl || `https://picsum.photos/seed/${doc.id}/800/600`;
+      const div = document.createElement('div');
+      div.className = `scard ${cls}`;
+      div.onclick = () => { currentStory = { id: doc.id, ...s }; viewStory(); };
+      div.innerHTML = `
+        <div class="scard-img">
+          <img src="${imgSrc}" alt="${s.title}" loading="lazy">
+          <div class="scard-cat">${s.category || 'Story'}</div>
+        </div>
+        <div class="scard-body">
+          <h3 class="scard-title">${s.title || s.rawTitle}</h3>
+          <p class="scard-exc">${(s.paragraphs?.[0] || s.body || '').substring(0,120)}…</p>
+          <div class="scard-byline">By <span>${s.author || 'Anonymous'}</span></div>
+        </div>
+      `;
+      grid.appendChild(div);
+      i++;
+      if (i > 7) return;
+    });
+  } catch(e) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--ink3);">Sign in to load stories.</div>';
+  }
+}
+
+// ══════ STORY VIEW ══════
+function viewCurrentStory() { viewStory(); }
+
+function viewStory() {
+  if (!currentStory) return;
+  const s = currentStory;
+  showPage('story');
+
+  const paragraphs = (s.paragraphs || [s.body || '']).filter(Boolean);
+  const imgSrc = s.imageUrl || `https://picsum.photos/seed/${s.id || 'val'}/1200/800`;
+  const hasVoice = !!s.voiceUrl;
+  const hasVideo = !!s.videoUrl;
+  const hasMusic = !!s.musicUrl;
+
+  const proseParts = paragraphs.map((p, i) => {
+    if (!p.trim()) return '';
+    if (i === 0) return `<p class="story-drop-cap">${p}</p>`;
+    return `<p>${p}</p>`;
+  }).join('');
+
+  const voiceSection = hasVoice ? `
+    <div class="story-audio-player">
+      <div class="audio-label">Voiceover Narration · ${s.providers?.voice || 'AI'}</div>
+      <div class="audio-controls">
+        <button class="audio-play-btn" onclick="toggleAudio('vo-audio')">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+        </button>
+        <div style="flex:1">
+          <audio id="vo-audio" src="${s.voiceUrl}" style="display:none"></audio>
+          <div style="font-size:.85rem; color:rgba(255,255,255,.7);">Tap to play narration</div>
+          <div style="font-size:.72rem; color:rgba(255,255,255,.35); margin-top:2px;">Generated by ${s.providers?.voice || 'AI'}</div>
+        </div>
+      </div>
+    </div>
+  ` : '';
+
+  const videoSection = hasVideo ? `
+    <div class="story-video-player">
+      <video src="${s.videoUrl}" controls playsinline loop style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+  ` : '';
+
+  const musicSection = hasMusic ? `
+    <div class="music-strip">
+      <div class="music-icon">🎼</div>
+      <div class="music-info">
+        <div class="music-title">${s.musicTitle || 'Background Score'}</div>
+        <div class="music-by">Generated by ${s.providers?.music || 'AI'}</div>
+      </div>
+      <audio id="bg-music" src="${s.musicUrl}" loop></audio>
+      <button class="music-btn" onclick="toggleAudio('bg-music')">
+        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+      </button>
+    </div>
+  ` : '';
+
+  const writerBadge = s.providers?.writer && s.providers.writer !== 'skip'
+    ? `<div class="generated-by-tag"><div class="dot"></div>Written by ${PROVIDERS.writer.find(p=>p.id===s.providers.writer)?.name || s.providers.writer}</div>`
+    : '';
+  const imageBadge = s.providers?.image && s.providers.image !== 'skip'
+    ? `<div class="generated-by-tag"><div class="dot"></div>Images by ${PROVIDERS.image.find(p=>p.id===s.providers.image)?.name || s.providers.image}</div>`
+    : '';
+
+  document.getElementById('story-viewer').innerHTML = `
+    <div class="story-page">
+      <div class="story-hero">
+        <div class="story-hero-text">
+          <div class="story-hero-cat">${s.category || 'Story'}</div>
+          <h1 class="story-hero-title">${s.title || s.rawTitle}</h1>
+          <div class="story-hero-byline">By ${s.author || 'Anonymous'} &nbsp;·&nbsp; ${s.tone || ''}</div>
+        </div>
+        <div class="story-hero-img">
+          <img src="${imgSrc}" alt="${s.title}">
+        </div>
+      </div>
+
+      <div class="story-body-wrap">
+        <div class="story-cols">
+          <div class="story-prose">
+            ${proseParts}
+
+            ${s.pullQuote ? `<div class="story-pullquote"><blockquote>"${s.pullQuote}"</blockquote></div>` : ''}
+
+            ${voiceSection}
+            ${videoSection}
+
+            ${s.imageUrl ? `
+              <div class="story-media-full">
+                <img src="${s.imageUrl}" alt="AI generated story image">
+                <div class="story-media-caption">Image generated by ${PROVIDERS.image.find(p=>p.id===s.providers?.image)?.name || 'AI'}</div>
+              </div>
+            ` : ''}
+
+            ${musicSection}
+          </div>
+
+          <div class="story-sidebar">
+            <div class="sidebar-label">Generated With</div>
+            ${writerBadge}${imageBadge}
+            ${hasVoice ? `<div class="generated-by-tag"><div class="dot"></div>Voice by ${PROVIDERS.voice.find(p=>p.id===s.providers?.voice)?.name||'AI'}</div>` : ''}
+            ${hasVideo ? `<div class="generated-by-tag"><div class="dot"></div>Video by ${PROVIDERS.video.find(p=>p.id===s.providers?.video)?.name||'AI'}</div>` : ''}
+            ${hasMusic ? `<div class="generated-by-tag"><div class="dot"></div>Music by ${PROVIDERS.music.find(p=>p.id===s.providers?.music)?.name||'AI'}</div>` : ''}
+            <hr class="sidebar-rule">
+            <div class="sidebar-label">Keywords</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${(s.keywords||[]).map(k=>`<span style="font-size:.72rem;background:var(--paper2);border:1px solid var(--rule);border-radius:100px;padding:3px 10px;color:var(--ink2);">${k}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleAudio(id) {
+  const a = document.getElementById(id);
+  if (!a) return;
+  if (a.paused) { a.play(); } else { a.pause(); }
+}
+
+// ══════ PAGE NAV ══════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const btn = document.getElementById('mnav-' + id);
+  if (btn) btn.classList.add('active');
+  if (id === 'create') {
+    document.getElementById('gen-panel').classList.remove('active');
+    goStep(1);
+  }
+  window.scrollTo(0, 0);
+}
+
+// ══════ UTILITIES ══════
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function showToast(msg) {
-
   const t = document.getElementById('toast');
-
   t.textContent = msg; t.classList.add('show');
-
-  setTimeout(() => t.classList.remove('show'), 3500);
-
+  setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-
-
-loadFeed();
-
+init();
 </script>
-
 </body>
-
 </html>
