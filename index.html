@@ -3,101 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video & Image Generator</title>
+    <title>Valor System - AI Media Hub</title>
     <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             display: flex;
-            justify-content: center;
-            padding: 40px 20px;
+            height: 100vh;
+            overflow: hidden;
         }
-        .container {
-            background: white;
-            padding: 30px;
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-item.active, .nav-item:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 { margin: 0; font-size: 32px; }
+        .header p { color: var(--text-muted); margin-top: 5px; }
+
+        /* Generator Panel */
+        .generator-panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            max-width: 600px;
+            padding: 30px;
             width: 100%;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        h2 { margin-top: 0; }
+
+        .form-group { margin-bottom: 20px; }
+        
         label {
-            font-weight: bold;
             display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
-        input[type="text"], input[type="password"], textarea, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        button {
-            margin-top: 20px;
+
+        input[type="password"], textarea, select {
             width: 100%;
             padding: 12px;
-            background-color: #007bff;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
         }
-        button:hover { background-color: #0056b3; }
-        button:disabled { background-color: #aaa; cursor: not-allowed; }
-        
+
+        button:hover { background-color: var(--primary-hover); }
+        button:disabled { background-color: var(--border-color); cursor: not-allowed; color: #64748b; }
+
+        /* Results Display Section */
         #result-container {
-            margin-top: 25px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 30px;
+            background-color: var(--panel-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
             text-align: center;
+            color: var(--text-muted);
         }
+
         video, img {
             max-width: 100%;
+            max-height: 500px;
             border-radius: 8px;
-            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
+
         .loading {
             display: none;
-            color: #007bff;
-            font-weight: bold;
-            margin-top: 15px;
+            color: var(--primary);
+            font-weight: 600;
+            animation: pulse 1.5s infinite;
         }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
         .error {
-            color: red;
+            color: #ef4444;
+            font-weight: 600;
             margin-top: 15px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Generate Media</h2>
-    <p>Select a model, enter your prompt, and provide your Replicate API key. Billing is handled through your own account.</p>
+<div class="sidebar">
+    <div class="logo">VALOR SYSTEM</div>
+    <div class="nav-item active">Studio Setup</div>
+    <div class="nav-item">My Generations</div>
+    <div class="nav-item">Settings & Keys</div>
+    <div style="flex-grow: 1;"></div>
+    <div class="nav-item" style="font-size: 12px; text-align: center; color: var(--border-color);">v1.0 - Open Source</div>
+</div>
 
-    <label for="apiKey">Your Replicate API Key:</label>
-    <input type="password" id="apiKey" placeholder="r8_..." required>
+<div class="main-content">
+    <div class="header">
+        <h1>Creative Studio</h1>
+        <p>Harness the power of AI video and image models on your terms.</p>
+    </div>
 
-    <label for="modelSelect">Choose a Model:</label>
-    <select id="modelSelect">
-        <option value="luma/ray">Video: Luma Ray (High Quality)</option>
-        <option value="minimax/video-01">Video: MiniMax</option>
-        <option value="black-forest-labs/flux-schnell">Image: Flux Schnell (Fast)</option>
-    </select>
+    <div class="generator-panel">
+        <div class="form-group">
+            <label for="apiKey">Replicate API Key (BYOK)</label>
+            <input type="password" id="apiKey" placeholder="r8_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" required>
+        </div>
 
-    <label for="prompt">What do you want to see?</label>
-    <textarea id="prompt" rows="3" placeholder="A cinematic shot of a futuristic city..." required></textarea>
+        <div class="form-group">
+            <label for="modelSelect">Select Engine</label>
+            <select id="modelSelect">
+                <option value="luma/ray">Video: Luma Ray (High Quality)</option>
+                <option value="minimax/video-01">Video: MiniMax</option>
+                <option value="black-forest-labs/flux-schnell">Image: Flux Schnell (Fast)</option>
+            </select>
+        </div>
 
-    <button id="generateBtn" onclick="generateMedia()">Generate</button>
+        <div class="form-group">
+            <label for="prompt">Generation Prompt</label>
+            <textarea id="prompt" rows="4" placeholder="Describe your vision in detail..." required></textarea>
+        </div>
 
-    <div id="loading" class="loading">Generating your media... This may take a minute or two.</div>
-    <div id="error" class="error"></div>
-    
-    <div id="result-container"></div>
+        <button id="generateBtn" onclick="generateMedia()">Initialize Generation</button>
+        <div id="error" class="error"></div>
+    </div>
+
+    <div id="result-container">
+        <div id="loading" class="loading">Processing prompt... This may take up to 2 minutes.</div>
+        <div id="placeholder-text">Your generated media will appear here.</div>
+    </div>
 </div>
 
 <script>
@@ -109,25 +235,36 @@
         const loading = document.getElementById('loading');
         const errorDiv = document.getElementById('error');
         const resultContainer = document.getElementById('result-container');
+        const placeholder = document.getElementById('placeholder-text');
 
-        // Clear previous results and errors
+        // Reset UI
         errorDiv.innerText = '';
-        resultContainer.innerHTML = '';
+        if(placeholder) placeholder.style.display = 'none';
+        
+        // Remove existing video/images from result container safely
+        const existingMedia = resultContainer.querySelectorAll('img, video');
+        existingMedia.forEach(el => el.remove());
 
         if (!apiKey || !prompt) {
-            errorDiv.innerText = "Please provide both an API key and a prompt.";
+            errorDiv.innerText = "Error: API key and prompt are required.";
+            if(placeholder) placeholder.style.display = 'block';
             return;
         }
 
         // Update UI to loading state
         btn.disabled = true;
         loading.style.display = 'block';
+        btn.innerText = "Generating...";
 
         try {
-            // Note: If you are hosting the frontend on GitHub Pages, you must change 
-            // '/generate-video' to the full URL of where your Node.js backend is hosted 
-            // (e.g., 'https://your-backend-app.onrender.com/generate-video')
-            const response = await fetch('/generate-video', {
+            // NOTE FOR GITHUB PAGES:
+            // GitHub Pages only hosts static HTML/CSS/JS. It cannot run a Node.js server.
+            // You MUST host the `server.js` file from our previous message on a free service 
+            // like Render.com, and paste the URL they give you here (e.g., 'https://your-valor-backend.onrender.com/generate-video'):
+            
+            const BACKEND_URL = '/generate-video'; // REPLACE THIS LINE LATER
+
+            const response = await fetch(BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -143,26 +280,24 @@
                 throw new Error(data.error || "Generation failed.");
             }
 
-            // Display the result (Handle both Images and Videos)
-            const mediaUrl = data.videoUrl; // Ensure your backend passes the URL here
+            const mediaUrl = data.videoUrl; 
             
             if (model.includes("flux")) {
-                // It's an image model
-                resultContainer.innerHTML = `<img src="${mediaUrl}" alt="Generated Image">`;
+                resultContainer.innerHTML += `<img src="${mediaUrl}" alt="Generated Image">`;
             } else {
-                // It's a video model
-                resultContainer.innerHTML = `<video controls autoplay loop><source src="${mediaUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                resultContainer.innerHTML += `<video controls autoplay loop><source src="${mediaUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
             }
 
         } catch (error) {
-            errorDiv.innerText = error.message;
+            errorDiv.innerText = "System Error: " + error.message;
+            if(placeholder) placeholder.style.display = 'block';
         } finally {
             // Reset UI
             btn.disabled = false;
             loading.style.display = 'none';
+            btn.innerText = "Initialize Generation";
         }
     }
 </script>
-
 </body>
 </html>
