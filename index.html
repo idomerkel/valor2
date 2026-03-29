@@ -812,14 +812,14 @@ const PROVIDERS = {
   writer: [
     { id:'claude', name:'Claude', model:'claude-3-5-sonnet', icon:'🟠', bg:'#fff8f5', auth:'key', key:'anthropic_key', keyLabel:'Anthropic API Key', keyPlaceholder:'sk-ant-…', desc:'Exceptional narrative writing, deep tone control.', badges:['rec','key'], rec:true },
     { id:'gpt4', name:'GPT-4o', model:'gpt-4o', icon:'🟢', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-…', desc:'World-class storytelling with rich style adaptation.', badges:['key'] },
-    { id:'gemini', name:'Gemini 1.5 Pro', model:'gemini-1.5-pro', icon:'🔵', bg:'#f5f8ff', auth:'oauth', oauthProvider:'google', desc:'Google\'s flagship model, great for descriptive prose.', badges:['oauth'] },
+    { id:'gemini', name:'Gemini 1.5 Pro', model:'gemini-1.5-pro', icon:'🔵', bg:'#f5f8ff', auth:'key', key:'google_ai_key', keyLabel:'Google AI Studio API Key', keyPlaceholder:'AIza…', desc:'Google\'s flagship model via AI Studio. Get a free key at aistudio.google.com.', badges:['key','free'] },
     { id:'mistral', name:'Mistral Large', model:'mistral-large', icon:'🌊', bg:'#f5faff', auth:'key', key:'mistral_key', keyLabel:'Mistral API Key', keyPlaceholder:'…', desc:'Fast European model with strong creative writing.', badges:['key'] },
     { id:'cohere', name:'Cohere Command R+', model:'command-r-plus', icon:'⚡', bg:'#fffaf5', auth:'key', key:'cohere_key', keyLabel:'Cohere API Key', keyPlaceholder:'…', desc:'Optimised for long-form content generation.', badges:['key'] },
     { id:'llama', name:'Llama 3.1 405B', model:'llama-3.1-405b', icon:'🦙', bg:'#f8f5ff', auth:'key', key:'groq_key', keyLabel:'Groq API Key (for Llama)', keyPlaceholder:'gsk_…', desc:'Open-source powerhouse via Groq. Fast & free-tier.', badges:['key','free'] },
   ],
   image: [
     { id:'dalle3', name:'DALL·E 3', model:'dall-e-3', icon:'🎨', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-…', desc:'Photorealistic images from detailed text prompts.', badges:['rec','key'], rec:true },
-    { id:'imagen3', name:'Imagen 3', model:'imagen-3', icon:'🖼️', bg:'#f5f8ff', auth:'oauth', oauthProvider:'google', desc:'Google\'s state-of-the-art photorealistic image generation.', badges:['oauth'] },
+    { id:'imagen3', name:'Imagen 3', model:'imagen-3', icon:'🖼️', bg:'#f5f8ff', auth:'key', key:'google_ai_key', keyLabel:'Google AI Studio API Key', keyPlaceholder:'AIza…', desc:'Google\'s photorealistic image generation via AI Studio.', badges:['key'] },
     { id:'flux', name:'FLUX.1 Pro', model:'flux-pro', icon:'⚡', bg:'#fff5f8', auth:'key', key:'bfl_key', keyLabel:'Black Forest Labs API Key', keyPlaceholder:'…', desc:'Exceptional detail and realism. Current state of the art.', badges:['key'] },
     { id:'sdxl', name:'Stable Diffusion XL', model:'sdxl', icon:'🌀', bg:'#f5f0ff', auth:'key', key:'stability_key', keyLabel:'Stability AI Key', keyPlaceholder:'sk-…', desc:'Highly customisable open model with style control.', badges:['key','free'] },
     { id:'midjourney', name:'Midjourney', model:'v6', icon:'🌙', bg:'#f0f5ff', auth:'key', key:'mj_key', keyLabel:'Midjourney API Key (beta)', keyPlaceholder:'…', desc:'Stunning artistic image quality. Distinctive aesthetic.', badges:['key'] },
@@ -838,7 +838,7 @@ const PROVIDERS = {
     { id:'skip', name:'Skip Voiceover', model:'none', icon:'⏭️', bg:'#fafafa', auth:'none', desc:'No voiceover. Story will be text-only.', badges:[] },
     { id:'elevenlabs', name:'ElevenLabs', model:'eleven_multilingual_v2', icon:'🎙️', bg:'#f5f8ff', auth:'key', key:'elevenlabs_key', keyLabel:'ElevenLabs API Key', keyPlaceholder:'xi-…', desc:'Industry-leading voice cloning and TTS quality.', badges:['rec','key'], rec:true },
     { id:'openai-tts', name:'OpenAI TTS', model:'tts-1-hd', icon:'🔊', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-…', desc:'Natural, expressive voices. HD model for best quality.', badges:['key'] },
-    { id:'google-tts', name:'Google TTS', model:'wavenet', icon:'🎵', bg:'#f5f8ff', auth:'oauth', oauthProvider:'google', desc:'WaveNet voices with natural prosody via OAuth.', badges:['oauth'] },
+    { id:'google-tts', name:'Google TTS', model:'wavenet', icon:'🎵', bg:'#f5f8ff', auth:'key', key:'google_ai_key', keyLabel:'Google AI Studio API Key', keyPlaceholder:'AIza…', desc:'WaveNet voices with natural prosody. Free key at aistudio.google.com.', badges:['key','free'] },
     { id:'playht', name:'PlayHT', model:'play3.0-mini', icon:'📻', bg:'#fff8f0', auth:'key', key:'playht_key', keyLabel:'PlayHT API Key', keyPlaceholder:'…', desc:'Ultra-realistic voices with great emotional range.', badges:['key'] },
     { id:'murf', name:'Murf AI', model:'murf-v2', icon:'🎤', bg:'#f5fff5', auth:'key', key:'murf_key', keyLabel:'Murf API Key', keyPlaceholder:'…', desc:'Studio-grade voices for professional narration.', badges:['key'] },
     { id:'resemble', name:'Resemble AI', model:'resemble-v2', icon:'🎭', bg:'#f8f5ff', auth:'key', key:'resemble_key', keyLabel:'Resemble API Key', keyPlaceholder:'…', desc:'Emotional voice synthesis with fine-grained control.', badges:['key'] },
@@ -875,16 +875,23 @@ function init() {
 
 auth.onAuthStateChanged(user => {
   currentUser = user;
+  // Guard against elements not yet in DOM (can fire before page is ready)
   const chip = document.getElementById('user-chip');
-  const btn = document.getElementById('auth-btn');
+  const btn  = document.getElementById('auth-btn');
+  if (!chip || !btn) return;
+
   if (user) {
     chip.style.display = 'flex';
-    document.getElementById('user-name-display').textContent = user.displayName?.split(' ')[0] || 'You';
+    const nameEl = document.getElementById('user-name-display');
+    if (nameEl) nameEl.textContent = user.displayName?.split(' ')[0] || 'You';
     const initials = (user.displayName || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     const av = document.getElementById('user-avatar');
-    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="">`;
-    else av.textContent = initials;
-    document.getElementById('user-initials').textContent = initials;
+    if (av) {
+      if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="" style="width:100%;height:100%;object-fit:cover;">`;
+      else av.textContent = initials;
+    }
+    const initEl = document.getElementById('user-initials');
+    if (initEl) initEl.textContent = initials;
     btn.textContent = 'Sign Out';
   } else {
     chip.style.display = 'none';
@@ -1009,7 +1016,7 @@ function selectProvider(task, id) {
   } else {
     cp.innerHTML = `
       <h4>${p.keyLabel}</h4>
-      <p>Your key is stored locally in your browser and never sent to our servers — only used for direct API calls.</p>
+      <p>Your key is stored locally — never sent to our servers, only used for direct API calls.${p.key === 'google_ai_key' ? ' Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--crimson);text-decoration:underline;">aistudio.google.com</a>.' : p.key === 'openai_key' ? ' Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--crimson);text-decoration:underline;">platform.openai.com</a>.' : p.key === 'anthropic_key' ? ' Get a key at <a href="https://console.anthropic.com/" target="_blank" style="color:var(--crimson);text-decoration:underline;">console.anthropic.com</a>.' : p.key === 'elevenlabs_key' ? ' Get a key at <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" style="color:var(--crimson);text-decoration:underline;">elevenlabs.io</a>.' : ''}</p>
       <div class="key-input-row">
         <input type="password" id="ki-${task}" placeholder="${p.keyPlaceholder}" value="${storedKey||''}">
         <button class="btn-connect" onclick="saveKey('${p.key}','${task}','${id}')">Connect</button>
@@ -1041,11 +1048,37 @@ function loadSavedKeys() {
 }
 
 async function doOAuth(provider, task, id) {
+  // doOAuth is called from an inline onclick — the user-gesture chain is intact here.
+  // We call signInWithPopup directly (not via login()) to keep the gesture alive.
   if (provider === 'google') {
-    await login();
-    if (googleToken) {
-      markOAuthConnected('google');
-      selectProvider(task, id); // re-render connect panel
+    const gp = new firebase.auth.GoogleAuthProvider();
+    gp.addScope('https://www.googleapis.com/auth/generative-language');
+    try {
+      const r = await auth.signInWithPopup(gp);
+      googleToken = r.credential?.accessToken || null;
+      if (googleToken) sessionStorage.setItem('valor_google_token', googleToken);
+      showToast('Connected with Google ✓');
+      selectProvider(task, id); // re-render connect panel to show connected state
+    } catch(e) {
+      const msgs = {
+        'auth/popup-blocked': 'Popup blocked — please allow popups for this site in your browser settings, then try again.',
+        'auth/popup-closed-by-user': 'Sign-in cancelled.',
+        'auth/cancelled-popup-request': 'Sign-in already in progress.',
+        'auth/network-request-failed': 'Network error — check your connection.',
+        'auth/unauthorized-domain': 'This domain is not authorised in Firebase. Add it in the Firebase Console → Authentication → Settings → Authorised domains.',
+      };
+      const msg = msgs[e.code] || ('Google sign-in failed: ' + (e.code || e.message));
+      showToast(msg);
+      // Also show inline in the connect panel so user sees it even if toast disappears
+      const cp = document.getElementById('cp-' + task);
+      if (cp) {
+        const errEl = cp.querySelector('.oauth-error') || document.createElement('p');
+        errEl.className = 'oauth-error';
+        errEl.style.cssText = 'color:var(--crimson);font-size:.78rem;margin-top:.75rem;line-height:1.5;';
+        errEl.textContent = '⚠ ' + msg;
+        if (!cp.querySelector('.oauth-error')) cp.appendChild(errEl);
+      }
+      console.error('doOAuth error:', e.code, e.message);
     }
   }
 }
@@ -1193,10 +1226,11 @@ async function runWriter(title, rawBody, results) {
     raw = data.choices?.[0]?.message?.content;
 
   } else if (writerSel === 'gemini') {
-    if (!googleToken) return { text: rawBody };
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent', {
+    const key = localStorage.getItem('valor_google_ai_key');
+    if (!key) return { text: rawBody };
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=' + key, {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + googleToken },
+      headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
     });
     const data = await res.json();
@@ -1219,6 +1253,20 @@ async function runImageGen(results) {
   const prompt = `Cinematic editorial photograph: ${keywords.join(', ')}. Magazine quality, dramatic lighting, photorealistic.`;
 
   if (imgSel === 'skip' || !imgSel) return { url: null };
+
+  if (imgSel === 'imagen3') {
+    const key = localStorage.getItem('valor_google_ai_key');
+    if (!key) return { url: null };
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=' + key, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ instances:[{ prompt }], parameters:{ sampleCount:1, aspectRatio:'16:9' } })
+    });
+    const data = await res.json();
+    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+    if (b64) return { url: 'data:image/png;base64,' + b64 };
+    return { url: null };
+  }
 
   if (imgSel === 'dalle3') {
     const key = localStorage.getItem('valor_openai_key');
@@ -1333,6 +1381,29 @@ async function runVoiceGen(results) {
     });
     if (res.ok) {
       const blob = await res.blob();
+      return { url: URL.createObjectURL(blob), type:'blob' };
+    }
+    return { url: null };
+  }
+
+  if (voiceSel === 'google-tts') {
+    const key = localStorage.getItem('valor_google_ai_key');
+    if (!key || !text) return { url: null };
+    const res = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key=' + key, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        input:{ text },
+        voice:{ languageCode:'en-US', name:'en-US-Wavenet-D', ssmlGender:'MALE' },
+        audioConfig:{ audioEncoding:'MP3', speakingRate:0.92, pitch:-1 }
+      })
+    });
+    const data = await res.json();
+    if (data.audioContent) {
+      const bytes = atob(data.audioContent);
+      const arr = new Uint8Array(bytes.length);
+      for (let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      const blob = new Blob([arr], {type:'audio/mp3'});
       return { url: URL.createObjectURL(blob), type:'blob' };
     }
     return { url: null };
