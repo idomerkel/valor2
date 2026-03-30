@@ -1172,6 +1172,29 @@ async function startPublish() {
     }
   }
 
+  // Show a result summary so user sees exactly what was generated
+  const summary = [
+    { label: 'Script', ok: !!R.write?.paragraphs?.length, detail: R.write?.paragraphs?.length ? R.write.paragraphs.length + ' paragraphs' : 'used raw text' },
+    { label: 'Image',  ok: !!R.image?.url, detail: R.image?.url ? 'URL received ✓' : 'no image — check key & provider' },
+    { label: 'Video',  ok: !!R.video?.url, detail: R.video?.url ? 'URL received ✓' : 'no video — check key & provider' },
+    { label: 'Voice',  ok: !!R.voice?.url, detail: R.voice?.url ? 'Audio ready ✓' : 'skipped or failed' },
+    { label: 'Music',  ok: !!R.music?.url,  detail: R.music?.url  ? 'Audio ready ✓' : 'skipped or failed' },
+  ];
+  const summaryHtml = summary.map(s => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--rule);font-size:.8rem;">
+      <span style="font-weight:500;color:var(--ink2);">${s.label}</span>
+      <span style="color:${s.ok ? 'var(--green)' : 'var(--crimson)'};">${s.detail}</span>
+    </div>
+  `).join('');
+  const doneArea = document.getElementById('gen-done-area');
+  const existingSummary = doneArea.querySelector('.result-summary');
+  if (!existingSummary) {
+    const div = document.createElement('div');
+    div.className = 'result-summary';
+    div.style.cssText = 'background:var(--paper2);border:1px solid var(--rule);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1.5rem;text-align:left;';
+    div.innerHTML = '<div style="font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem;">Generation Results</div>' + summaryHtml;
+    doneArea.insertBefore(div, doneArea.firstChild);
+  }
   document.getElementById('gen-done-area').classList.remove('hidden');
 }
 
@@ -1365,27 +1388,41 @@ async function runVideoGen(results) {
     // Step 2: Poll for completion — typically 30–90s for a 5s clip
     for (let i = 0; i < 40; i++) {
       await delay(5000);
+
+      // Update the UI with live poll count so user knows it's working
+      const elapsed = (i + 1) * 5;
+      const stEl = document.getElementById('gss-video');
+      if (stEl) stEl.textContent = `Runway processing… ${elapsed}s elapsed (usually 30–90s)`;
+
       const pollRes = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
         headers: {
           'Authorization': 'Bearer ' + key,
           'X-Runway-Version': '2024-11-06'
         }
       });
-      if (!pollRes.ok) continue;
+
+      if (!pollRes.ok) {
+        console.warn('Runway poll HTTP error:', pollRes.status);
+        continue;
+      }
+
       const task = await pollRes.json();
-      console.log('Runway poll:', task.status, i);
+      console.log(`Runway poll ${i+1}: status=${task.status}`, task);
 
       if (task.status === 'SUCCEEDED') {
         const videoUrl = task.output?.[0] || null;
-        if (!videoUrl) throw new Error('Runway succeeded but no output URL');
+        if (!videoUrl) throw new Error('Runway succeeded but output array was empty');
         return { url: videoUrl, provider: 'Runway Gen-4.5' };
       }
+
       if (task.status === 'FAILED') {
-        console.error('Runway task failed:', task.failure, task.failureCode);
-        throw new Error('Runway generation failed: ' + (task.failure || task.failureCode || 'unknown'));
+        const reason = task.failure || task.failureCode || JSON.stringify(task);
+        throw new Error('Runway failed: ' + reason);
       }
+
+      // RUNNING or PENDING — keep polling
     }
-    throw new Error('Runway timed out after 200s');
+    throw new Error('Runway timed out after 200 seconds — the video may still be generating. Check your Runway dashboard.');
   }
 
   if (vidSel === 'pika') {
@@ -1558,16 +1595,37 @@ async function startPublish() {
   const R = {};
 
   setStage('write','running','Polishing your narrative…');
-  try { R.write = await runWriter(title, body); setStage('write','done','Complete ✓'); }
-  catch(e){ setStage('write','error','Failed — using raw text'); R.write = { paragraphs:[body], keywords:['hero','courage'] }; }
+  try {
+    R.write = await runWriter(title, body);
+    setStage('write','done','Complete ✓');
+  } catch(e) {
+    const msg = e?.message || String(e);
+    setStage('write','error','Failed: ' + msg);
+    console.error('Writer error:', e);
+    R.write = { paragraphs:[body], keywords:['hero','courage'] };
+  }
 
   setStage('image','running','Generating images…');
-  try { R.image = await runImageGen(R); setStage('image','done','Complete ✓'); }
-  catch(e){ setStage('image','error','Failed'); R.image = { url: null }; }
+  try {
+    R.image = await runImageGen(R);
+    setStage('image', R.image.url ? 'done' : 'error', R.image.url ? 'Complete ✓' : 'No key or provider returned nothing');
+  } catch(e) {
+    const msg = e?.message || String(e);
+    setStage('image','error','Failed: ' + msg);
+    console.error('Image error:', e);
+    R.image = { url: null };
+  }
 
-  setStage('video','running','Composing cinematic clip…');
-  try { R.video = await runVideoGen(R); setStage('video','done', R.video.url ? 'Complete ✓' : 'Skipped'); }
-  catch(e){ setStage('video','error','Failed'); R.video = { url: null }; }
+  setStage('video','running','Submitting to Runway…');
+  try {
+    R.video = await runVideoGen(R);
+    setStage('video', R.video.url ? 'done' : 'error', R.video.url ? 'Complete ✓' : 'No key or provider skipped — check console');
+  } catch(e) {
+    const msg = e?.message || String(e);
+    setStage('video','error','Failed: ' + msg);
+    console.error('Video error:', e);
+    R.video = { url: null };
+  }
 
   setStage('voice','running','Recording narration…');
   try { R.voice = await runVoiceGen(R); setStage('voice','done', R.voice.url ? 'Complete ✓' : 'Skipped'); }
@@ -1601,6 +1659,29 @@ async function startPublish() {
     loadFeed();
   } catch(e){ setStage('publish','error','Save failed'); }
 
+  // Show a result summary so user sees exactly what was generated
+  const summary = [
+    { label: 'Script', ok: !!R.write?.paragraphs?.length, detail: R.write?.paragraphs?.length ? R.write.paragraphs.length + ' paragraphs' : 'used raw text' },
+    { label: 'Image',  ok: !!R.image?.url, detail: R.image?.url ? 'URL received ✓' : 'no image — check key & provider' },
+    { label: 'Video',  ok: !!R.video?.url, detail: R.video?.url ? 'URL received ✓' : 'no video — check key & provider' },
+    { label: 'Voice',  ok: !!R.voice?.url, detail: R.voice?.url ? 'Audio ready ✓' : 'skipped or failed' },
+    { label: 'Music',  ok: !!R.music?.url,  detail: R.music?.url  ? 'Audio ready ✓' : 'skipped or failed' },
+  ];
+  const summaryHtml = summary.map(s => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--rule);font-size:.8rem;">
+      <span style="font-weight:500;color:var(--ink2);">${s.label}</span>
+      <span style="color:${s.ok ? 'var(--green)' : 'var(--crimson)'};">${s.detail}</span>
+    </div>
+  `).join('');
+  const doneArea = document.getElementById('gen-done-area');
+  const existingSummary = doneArea.querySelector('.result-summary');
+  if (!existingSummary) {
+    const div = document.createElement('div');
+    div.className = 'result-summary';
+    div.style.cssText = 'background:var(--paper2);border:1px solid var(--rule);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1.5rem;text-align:left;';
+    div.innerHTML = '<div style="font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem;">Generation Results</div>' + summaryHtml;
+    doneArea.insertBefore(div, doneArea.firstChild);
+  }
   document.getElementById('gen-done-area').classList.remove('hidden');
 }
 
