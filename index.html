@@ -361,36 +361,75 @@ img { display: block; }
 
 /* Generation progress */
 .gen-panel {
-  padding: 3rem 3.5rem; display: none; max-width: 760px;
+  padding: 3rem 3.5rem; display: none; max-width: 760px; width: 100%;
 }
 .gen-panel.active { display: block; }
+
+/* Master progress bar */
+.master-progress-wrap {
+  margin-bottom: 2.5rem;
+}
+.master-progress-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: .6rem;
+}
+.master-progress-label {
+  font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink3);
+}
+.master-progress-pct {
+  font-family: var(--body-serif); font-size: 1.4rem; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.master-progress-track {
+  height: 6px; background: var(--paper3); border-radius: 100px;
+  overflow: hidden; margin-bottom: .5rem;
+}
+.master-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--crimson), var(--gold));
+  border-radius: 100px; width: 0%;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.master-time-label {
+  font-size: .75rem; color: var(--ink3); font-variant-numeric: tabular-nums;
+}
+
 .gen-stage {
   display: flex; align-items: center; gap: 14px;
   padding: 1rem 1.25rem; border-radius: var(--radius-md);
-  border: 1px solid var(--rule); background: white; margin-bottom: .75rem;
+  border: 1px solid var(--rule); background: white; margin-bottom: .6rem;
   transition: all .3s;
 }
 .gen-stage.running { border-color: var(--gold); background: var(--gold-light); }
 .gen-stage.done { border-color: var(--green); background: var(--green-light); }
 .gen-stage.error { border-color: var(--crimson); background: var(--crimson-light); }
 .stage-icon {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0; background: var(--paper3);
+  font-size: .9rem; flex-shrink: 0; background: var(--paper3);
 }
 .gen-stage.running .stage-icon { background: var(--gold-light); }
 .gen-stage.done .stage-icon { background: var(--green-light); }
-.stage-name { font-size: .85rem; font-weight: 600; color: var(--ink); }
-.stage-status { font-size: .75rem; color: var(--ink3); margin-top: 2px; }
+.stage-name { font-size: .82rem; font-weight: 600; color: var(--ink); }
+.stage-status { font-size: .72rem; color: var(--ink3); margin-top: 2px; }
 .gen-stage.running .stage-status { color: var(--gold); }
 .gen-stage.done .stage-status { color: var(--green); }
+.gen-stage.error .stage-status { color: var(--crimson); }
 .stage-spin {
-  width: 18px; height: 18px; border: 2px solid var(--rule);
+  width: 16px; height: 16px; border: 2px solid var(--rule);
   border-top-color: var(--gold); border-radius: 50%;
   animation: spin .7s linear infinite; margin-left: auto; flex-shrink: 0;
 }
-.stage-tick { margin-left: auto; color: var(--green); font-size: 1.1rem; }
+.stage-tick { margin-left: auto; color: var(--green); font-size: 1rem; }
+.stage-x { margin-left: auto; color: var(--crimson); font-size: 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Auto-redirect countdown */
+.redirect-bar {
+  height: 3px; background: var(--crimson);
+  border-radius: 100px; width: 100%;
+  transition: width 3s linear;
+}
 
 /* ══════════ STORY VIEW ══════════ */
 .story-page { background: var(--paper); }
@@ -768,17 +807,37 @@ img { display: block; }
       </div>
     </div>
 
-    <!-- Generation progress (replaces main when generating) -->
+    <!-- Generation progress — inside wizard-main so it fills the right column correctly -->
     <div class="gen-panel" id="gen-panel">
-      <div class="wpanel-eyebrow">Generating</div>
-      <h2 class="wpanel-title">Building your story…</h2>
-      <p class="wpanel-sub" style="margin-bottom:2rem;">Each AI is working on its part. This usually takes 30–90 seconds.</p>
+      <div class="wpanel-eyebrow">Publishing Pipeline</div>
+      <h2 class="wpanel-title" id="gen-headline">Building your story…</h2>
+
+      <!-- Master progress bar -->
+      <div class="master-progress-wrap">
+        <div class="master-progress-header">
+          <span class="master-progress-label">Overall Progress</span>
+          <span class="master-progress-pct" id="gen-pct">0%</span>
+        </div>
+        <div class="master-progress-track">
+          <div class="master-progress-fill" id="gen-fill"></div>
+        </div>
+        <div class="master-time-label" id="gen-time">Estimating time…</div>
+      </div>
+
+      <!-- Individual stage rows -->
       <div id="gen-stages"></div>
-      <div id="gen-done-area" class="hidden" style="margin-top:2rem; text-align:center;">
-        <div style="font-size:3rem; margin-bottom:1rem;">✦</div>
-        <h3 style="font-family:var(--display); font-size:2rem; margin-bottom:.5rem;">Your story is live.</h3>
-        <p style="color:var(--ink3); font-family:var(--body-serif); font-style:italic; margin-bottom:1.5rem;">Open it to read the finished cinematic page.</p>
-        <button class="btn-next" style="width:auto; padding:12px 32px;" onclick="viewCurrentStory()">Read My Story →</button>
+
+      <!-- Done area with auto-redirect -->
+      <div id="gen-done-area" class="hidden" style="margin-top:2rem;">
+        <div style="padding:1.5rem;background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-md);margin-bottom:1.25rem;" id="result-summary-wrap"></div>
+        <div style="text-align:center; padding:1.5rem 0;">
+          <div style="font-family:var(--display);font-size:2rem;margin-bottom:.4rem;">Your story is live.</div>
+          <p style="color:var(--ink3);font-family:var(--body-serif);font-style:italic;margin-bottom:1.25rem;">Redirecting to your story in <span id="redirect-count">3</span>s…</p>
+          <div style="height:3px;background:var(--paper3);border-radius:100px;overflow:hidden;margin-bottom:1.25rem;">
+            <div class="redirect-bar" id="redirect-bar" style="width:100%;"></div>
+          </div>
+          <button class="btn-next" style="width:auto;padding:11px 28px;" onclick="viewCurrentStory()">Open Story Now →</button>
+        </div>
       </div>
     </div>
 
@@ -1143,6 +1202,16 @@ async function startPublish() {
   document.getElementById('gen-panel').classList.add('active');
   document.getElementById('gen-done-area').classList.add('hidden');
 
+  // Reset progress state
+  genStartTime = Date.now();
+  Object.keys(stageState).forEach(k => delete stageState[k]);
+  const fillEl = document.getElementById('gen-fill');
+  const pctEl2 = document.getElementById('gen-pct');
+  const timeEl2 = document.getElementById('gen-time');
+  if (fillEl) fillEl.style.width = '0%';
+  if (pctEl2) pctEl2.textContent = '0%';
+  if (timeEl2) timeEl2.textContent = 'Estimating time…';
+
   const tasks = [
     { id:'write', label:'Script Doctor', desc:'Polishing your narrative…', icon:'✍️', fn: () => runWriter(title, body) },
     { id:'image', label:'Image Generation', desc:'Creating cinematic visuals…', icon:'🖼️', fn: runImageGen },
@@ -1172,31 +1241,62 @@ async function startPublish() {
     }
   }
 
-  // Show a result summary so user sees exactly what was generated
-  const summary = [
-    { label: 'Script', ok: !!R.write?.paragraphs?.length, detail: R.write?.paragraphs?.length ? R.write.paragraphs.length + ' paragraphs' : 'used raw text' },
-    { label: 'Image',  ok: !!R.image?.url, detail: R.image?.url ? 'URL received ✓' : 'no image — check key & provider' },
-    { label: 'Video',  ok: !!R.video?.url, detail: R.video?.url ? 'URL received ✓' : 'no video — check key & provider' },
-    { label: 'Voice',  ok: !!R.voice?.url, detail: R.voice?.url ? 'Audio ready ✓' : 'skipped or failed' },
-    { label: 'Music',  ok: !!R.music?.url,  detail: R.music?.url  ? 'Audio ready ✓' : 'skipped or failed' },
+  // Fill master bar to 100%
+  const fillFinal = document.getElementById('gen-fill');
+  const pctFinal = document.getElementById('gen-pct');
+  const timeFinal = document.getElementById('gen-time');
+  if (fillFinal) fillFinal.style.width = '100%';
+  if (pctFinal) pctFinal.textContent = '100%';
+  const totalSec = Math.round((Date.now() - (genStartTime || Date.now())) / 1000);
+  if (timeFinal) timeFinal.textContent = `Complete in ${totalSec}s`;
+
+  // Result summary
+  const summaryItems = [
+    { label: 'Script',    ok: !!R.write?.paragraphs?.length, detail: R.write?.paragraphs?.length ? R.write.paragraphs.length + ' paragraphs written' : 'used raw text' },
+    { label: 'Image',     ok: !!R.image?.url,  detail: R.image?.url  ? 'Generated ✓' : 'not generated' },
+    { label: 'Video',     ok: !!R.video?.url,  detail: R.video?.url  ? 'Generated ✓' : 'not generated' },
+    { label: 'Voiceover', ok: !!R.voice?.url,  detail: R.voice?.url  ? 'Recorded ✓'  : 'skipped' },
+    { label: 'Music',     ok: !!R.music?.url,  detail: R.music?.url  ? 'Composed ✓'  : 'skipped' },
   ];
-  const summaryHtml = summary.map(s => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--rule);font-size:.8rem;">
-      <span style="font-weight:500;color:var(--ink2);">${s.label}</span>
-      <span style="color:${s.ok ? 'var(--green)' : 'var(--crimson)'};">${s.detail}</span>
-    </div>
-  `).join('');
-  const doneArea = document.getElementById('gen-done-area');
-  const existingSummary = doneArea.querySelector('.result-summary');
-  if (!existingSummary) {
-    const div = document.createElement('div');
-    div.className = 'result-summary';
-    div.style.cssText = 'background:var(--paper2);border:1px solid var(--rule);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1.5rem;text-align:left;';
-    div.innerHTML = '<div style="font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem;">Generation Results</div>' + summaryHtml;
-    doneArea.insertBefore(div, doneArea.firstChild);
+  const summaryHtml = summaryItems.map(s =>
+    `<div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(31,107,68,.15);font-size:.78rem;">
+      <span style="color:var(--green);font-weight:500;">${s.label}</span>
+      <span style="color:${s.ok ? 'var(--green)' : 'var(--ink3)'};">${s.detail}</span>
+    </div>`
+  ).join('');
+  const summaryWrap = document.getElementById('result-summary-wrap');
+  if (summaryWrap) {
+    summaryWrap.innerHTML = '<div style="font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem;">What was generated</div>' + summaryHtml;
   }
+
   document.getElementById('gen-done-area').classList.remove('hidden');
+
+  // Auto-redirect countdown: 3s then go to story
+  let count = 3;
+  const countEl = document.getElementById('redirect-count');
+  const barEl = document.getElementById('redirect-bar');
+  if (countEl) countEl.textContent = count;
+  // Trigger CSS transition — shrink bar to 0 over 3s
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (barEl) barEl.style.width = '0%';
+    });
+  });
+  const ticker = setInterval(() => {
+    count--;
+    if (countEl) countEl.textContent = count;
+    if (count <= 0) {
+      clearInterval(ticker);
+      viewCurrentStory();
+    }
+  }, 1000);
 }
+
+// Stage order and weights for progress calculation
+const STAGE_ORDER = ['write','image','video','voice','music','publish'];
+const STAGE_WEIGHTS = { write:15, image:20, video:35, voice:15, music:10, publish:5 };
+const stageState = {};
+let genStartTime = null;
 
 function setStage(id, state, msg) {
   const el = document.getElementById('gs-' + id);
@@ -1204,13 +1304,48 @@ function setStage(id, state, msg) {
   if (!el || !st) return;
   el.className = 'gen-stage ' + state;
   st.textContent = msg;
-  // spinner
-  const existing = el.querySelector('.stage-spin, .stage-tick');
+  stageState[id] = state;
+
+  // Update spinner/tick/x indicator
+  const existing = el.querySelector('.stage-spin, .stage-tick, .stage-x');
   if (existing) existing.remove();
   if (state === 'running') {
-    const s = document.createElement('div'); s.className='stage-spin'; el.appendChild(s);
+    const s = document.createElement('div'); s.className = 'stage-spin'; el.appendChild(s);
   } else if (state === 'done') {
-    const t = document.createElement('div'); t.className='stage-tick'; t.textContent='✓'; el.appendChild(t);
+    const t = document.createElement('div'); t.className = 'stage-tick'; t.textContent = '✓'; el.appendChild(t);
+  } else if (state === 'error') {
+    const x = document.createElement('div'); x.className = 'stage-x'; x.textContent = '✕'; el.appendChild(x);
+  }
+
+  // Recalculate overall progress
+  let pct = 0;
+  for (const sid of STAGE_ORDER) {
+    if (stageState[sid] === 'done' || stageState[sid] === 'error') {
+      pct += STAGE_WEIGHTS[sid];
+    } else if (stageState[sid] === 'running') {
+      pct += STAGE_WEIGHTS[sid] * 0.4; // show partial progress for running stage
+    }
+  }
+  pct = Math.min(Math.round(pct), 99); // never show 100% until truly done
+
+  const fill = document.getElementById('gen-fill');
+  const pctEl = document.getElementById('gen-pct');
+  const timeEl = document.getElementById('gen-time');
+  if (fill) fill.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+
+  // Estimate time remaining based on elapsed and progress
+  if (genStartTime && pct > 5 && timeEl) {
+    const elapsed = (Date.now() - genStartTime) / 1000;
+    const totalEst = elapsed / (pct / 100);
+    const remaining = Math.max(0, Math.round(totalEst - elapsed));
+    if (remaining > 60) {
+      timeEl.textContent = `About ${Math.ceil(remaining/60)} min remaining · ${Math.round(elapsed)}s elapsed`;
+    } else if (remaining > 0) {
+      timeEl.textContent = `About ${remaining}s remaining · ${Math.round(elapsed)}s elapsed`;
+    } else {
+      timeEl.textContent = `Finishing up… · ${Math.round(elapsed)}s elapsed`;
+    }
   }
 }
 
@@ -1575,6 +1710,16 @@ async function startPublish() {
   document.getElementById('gen-panel').classList.add('active');
   document.getElementById('gen-done-area').classList.add('hidden');
 
+  // Reset progress state
+  genStartTime = Date.now();
+  Object.keys(stageState).forEach(k => delete stageState[k]);
+  const fillEl = document.getElementById('gen-fill');
+  const pctEl2 = document.getElementById('gen-pct');
+  const timeEl2 = document.getElementById('gen-time');
+  if (fillEl) fillEl.style.width = '0%';
+  if (pctEl2) pctEl2.textContent = '0%';
+  if (timeEl2) timeEl2.textContent = 'Estimating time…';
+
   const tasks = [
     { id:'write',   label:'Script Doctor',     desc:'Polishing your narrative…',    icon:'✍️' },
     { id:'image',   label:'Image Generation',  desc:'Creating cinematic visuals…',  icon:'🖼️' },
@@ -1659,30 +1804,55 @@ async function startPublish() {
     loadFeed();
   } catch(e){ setStage('publish','error','Save failed'); }
 
-  // Show a result summary so user sees exactly what was generated
-  const summary = [
-    { label: 'Script', ok: !!R.write?.paragraphs?.length, detail: R.write?.paragraphs?.length ? R.write.paragraphs.length + ' paragraphs' : 'used raw text' },
-    { label: 'Image',  ok: !!R.image?.url, detail: R.image?.url ? 'URL received ✓' : 'no image — check key & provider' },
-    { label: 'Video',  ok: !!R.video?.url, detail: R.video?.url ? 'URL received ✓' : 'no video — check key & provider' },
-    { label: 'Voice',  ok: !!R.voice?.url, detail: R.voice?.url ? 'Audio ready ✓' : 'skipped or failed' },
-    { label: 'Music',  ok: !!R.music?.url,  detail: R.music?.url  ? 'Audio ready ✓' : 'skipped or failed' },
+  // Fill master bar to 100%
+  const fillFinal = document.getElementById('gen-fill');
+  const pctFinal = document.getElementById('gen-pct');
+  const timeFinal = document.getElementById('gen-time');
+  if (fillFinal) fillFinal.style.width = '100%';
+  if (pctFinal) pctFinal.textContent = '100%';
+  const totalSec = Math.round((Date.now() - (genStartTime || Date.now())) / 1000);
+  if (timeFinal) timeFinal.textContent = `Complete in ${totalSec}s`;
+
+  // Result summary
+  const summaryItems = [
+    { label: 'Script',    ok: !!R.write?.paragraphs?.length, detail: R.write?.paragraphs?.length ? R.write.paragraphs.length + ' paragraphs written' : 'used raw text' },
+    { label: 'Image',     ok: !!R.image?.url,  detail: R.image?.url  ? 'Generated ✓' : 'not generated' },
+    { label: 'Video',     ok: !!R.video?.url,  detail: R.video?.url  ? 'Generated ✓' : 'not generated' },
+    { label: 'Voiceover', ok: !!R.voice?.url,  detail: R.voice?.url  ? 'Recorded ✓'  : 'skipped' },
+    { label: 'Music',     ok: !!R.music?.url,  detail: R.music?.url  ? 'Composed ✓'  : 'skipped' },
   ];
-  const summaryHtml = summary.map(s => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--rule);font-size:.8rem;">
-      <span style="font-weight:500;color:var(--ink2);">${s.label}</span>
-      <span style="color:${s.ok ? 'var(--green)' : 'var(--crimson)'};">${s.detail}</span>
-    </div>
-  `).join('');
-  const doneArea = document.getElementById('gen-done-area');
-  const existingSummary = doneArea.querySelector('.result-summary');
-  if (!existingSummary) {
-    const div = document.createElement('div');
-    div.className = 'result-summary';
-    div.style.cssText = 'background:var(--paper2);border:1px solid var(--rule);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1.5rem;text-align:left;';
-    div.innerHTML = '<div style="font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem;">Generation Results</div>' + summaryHtml;
-    doneArea.insertBefore(div, doneArea.firstChild);
+  const summaryHtml = summaryItems.map(s =>
+    `<div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(31,107,68,.15);font-size:.78rem;">
+      <span style="color:var(--green);font-weight:500;">${s.label}</span>
+      <span style="color:${s.ok ? 'var(--green)' : 'var(--ink3)'};">${s.detail}</span>
+    </div>`
+  ).join('');
+  const summaryWrap = document.getElementById('result-summary-wrap');
+  if (summaryWrap) {
+    summaryWrap.innerHTML = '<div style="font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem;">What was generated</div>' + summaryHtml;
   }
+
   document.getElementById('gen-done-area').classList.remove('hidden');
+
+  // Auto-redirect countdown: 3s then go to story
+  let count = 3;
+  const countEl = document.getElementById('redirect-count');
+  const barEl = document.getElementById('redirect-bar');
+  if (countEl) countEl.textContent = count;
+  // Trigger CSS transition — shrink bar to 0 over 3s
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (barEl) barEl.style.width = '0%';
+    });
+  });
+  const ticker = setInterval(() => {
+    count--;
+    if (countEl) countEl.textContent = count;
+    if (count <= 0) {
+      clearInterval(ticker);
+      viewCurrentStory();
+    }
+  }, 1000);
 }
 
 // ══════ FEED ══════
@@ -1861,7 +2031,13 @@ function showPage(id) {
   const btn = document.getElementById('mnav-' + id);
   if (btn) btn.classList.add('active');
   if (id === 'create') {
+    // Hide gen-panel and reset to step 1
     document.getElementById('gen-panel').classList.remove('active');
+    document.getElementById('gen-done-area').classList.add('hidden');
+    document.getElementById('gen-stages').innerHTML = '';
+    // Make sure at least wp1 is shown
+    document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('wp1').classList.add('active');
     goStep(1);
   }
   window.scrollTo(0, 0);
