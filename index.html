@@ -828,7 +828,7 @@ const PROVIDERS = {
   video: [
     { id:'skip', name:'Skip Video', model:'none', icon:'⏭️', bg:'#fafafa', auth:'none', desc:'No video generation. Story will use images only.', badges:[] },
     { id:'sora', name:'Sora', model:'sora', icon:'🎬', bg:'#f5faf5', auth:'key', key:'openai_key', keyLabel:'OpenAI API Key (Sora access)', keyPlaceholder:'sk-…', desc:'OpenAI\'s video generation. High fidelity cinematic output.', badges:['rec','key'], rec:true },
-    { id:'runway', name:'Runway Gen-3 Alpha', model:'gen3', icon:'🛫', bg:'#f5f8ff', auth:'key', key:'runway_key', keyLabel:'Runway API Key', keyPlaceholder:'…', desc:'Leading text-to-video with strong motion quality.', badges:['key'] },
+    { id:'runway', name:'Runway Gen-4.5', model:'gen4.5', icon:'🛫', bg:'#f5f8ff', auth:'key', key:'runway_key', keyLabel:'Runway API Key', keyPlaceholder:'rw-…', desc:'Latest Runway model. Text-to-video, no image needed. Get a free key at dev.runwayml.com.', badges:['rec','key'], rec:true },
     { id:'kling', name:'Kling 1.5', model:'kling-1.5', icon:'🌊', bg:'#f0f8ff', auth:'key', key:'kling_key', keyLabel:'Kling API Key', keyPlaceholder:'…', desc:'Exceptional realistic motion. Strong cinematic look.', badges:['key'] },
     { id:'pika', name:'Pika 2.0', model:'pika-2', icon:'✨', bg:'#fff8f0', auth:'key', key:'pika_key', keyLabel:'Pika Labs API Key', keyPlaceholder:'pk-…', desc:'Fast, stylised video with great short-clip quality.', badges:['key'] },
     { id:'hailuo', name:'Hailuo AI', model:'hailuo', icon:'🌸', bg:'#fff5f8', auth:'key', key:'hailuo_key', keyLabel:'Hailuo API Key', keyPlaceholder:'…', desc:'MiniMax\'s video model. Great realism for portraits.', badges:['key'] },
@@ -1330,23 +1330,62 @@ async function runVideoGen(results) {
   if (vidSel === 'runway') {
     const key = localStorage.getItem('valor_runway_key');
     if (!key) return { url: null };
-    // Runway Gen-3 API
-    const res = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + key, 'X-Runway-Version':'2024-11-06' },
-      body: JSON.stringify({ model:'gen3a_turbo', promptText: prompt, duration:5, ratio:'1280:768' })
+
+    // Build a tight cinematic prompt from story keywords (max 512 chars per Runway docs)
+    const keywords = results?.write?.keywords || ['hero', 'courage'];
+    const tone = document.getElementById('s-tone')?.value || 'Cinematic';
+    const videoPrompt = `Cinematic documentary footage: ${keywords.join(', ')}. ${tone} mood, dramatic natural lighting, slow camera movement, photorealistic.`.slice(0, 512);
+
+    // Step 1: Submit generation task — Gen 4.5, text-to-video (no image needed)
+    const submitRes = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key,
+        'X-Runway-Version': '2024-11-06'
+      },
+      body: JSON.stringify({
+        model: 'gen4.5',
+        promptText: videoPrompt,
+        ratio: '1280:720',
+        duration: 5
+      })
     });
-    const data = await res.json();
-    if (data.id) {
-      for (let i=0; i<30; i++) {
-        await delay(5000);
-        const poll = await fetch(`https://api.dev.runwayml.com/v1/tasks/${data.id}`, { headers:{'Authorization':'Bearer '+key,'X-Runway-Version':'2024-11-06'} });
-        const r = await poll.json();
-        if (r.status === 'SUCCEEDED') return { url: r.output?.[0] || null };
-        if (r.status === 'FAILED') return { url: null };
+
+    if (!submitRes.ok) {
+      const err = await submitRes.json().catch(() => ({}));
+      console.error('Runway submit error:', submitRes.status, err);
+      throw new Error(err?.message || 'Runway submission failed (' + submitRes.status + ')');
+    }
+
+    const submitData = await submitRes.json();
+    const taskId = submitData.id;
+    if (!taskId) throw new Error('Runway did not return a task ID');
+
+    // Step 2: Poll for completion — typically 30–90s for a 5s clip
+    for (let i = 0; i < 40; i++) {
+      await delay(5000);
+      const pollRes = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'X-Runway-Version': '2024-11-06'
+        }
+      });
+      if (!pollRes.ok) continue;
+      const task = await pollRes.json();
+      console.log('Runway poll:', task.status, i);
+
+      if (task.status === 'SUCCEEDED') {
+        const videoUrl = task.output?.[0] || null;
+        if (!videoUrl) throw new Error('Runway succeeded but no output URL');
+        return { url: videoUrl, provider: 'Runway Gen-4.5' };
+      }
+      if (task.status === 'FAILED') {
+        console.error('Runway task failed:', task.failure, task.failureCode);
+        throw new Error('Runway generation failed: ' + (task.failure || task.failureCode || 'unknown'));
       }
     }
-    return { url: null };
+    throw new Error('Runway timed out after 200s');
   }
 
   if (vidSel === 'pika') {
