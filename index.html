@@ -360,10 +360,7 @@ img { display: block; }
 .btn-next.publish:hover { background: #9a1e30; }
 
 /* Generation progress */
-.gen-panel {
-  padding: 3rem 3.5rem; display: none; max-width: 760px; width: 100%;
-}
-.gen-panel.active { display: block; }
+/* gen-panel replaced by #gen-overlay fixed positioned element */
 
 /* Master progress bar */
 .master-progress-wrap {
@@ -424,12 +421,6 @@ img { display: block; }
 .stage-x { margin-left: auto; color: var(--crimson); font-size: 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Auto-redirect countdown */
-.redirect-bar {
-  height: 3px; background: var(--crimson);
-  border-radius: 100px; width: 100%;
-  transition: width 3s linear;
-}
 
 /* ══════════ STORY VIEW ══════════ */
 .story-page { background: var(--paper); }
@@ -807,40 +798,45 @@ img { display: block; }
       </div>
     </div>
 
-    <!-- Generation progress — inside wizard-main so it fills the right column correctly -->
-    <div class="gen-panel" id="gen-panel">
-      <div class="wpanel-eyebrow">Publishing Pipeline</div>
-      <h2 class="wpanel-title" id="gen-headline">Building your story…</h2>
+    
 
-      <!-- Master progress bar -->
-      <div class="master-progress-wrap">
-        <div class="master-progress-header">
-          <span class="master-progress-label">Overall Progress</span>
-          <span class="master-progress-pct" id="gen-pct">0%</span>
-        </div>
-        <div class="master-progress-track">
-          <div class="master-progress-fill" id="gen-fill"></div>
-        </div>
-        <div class="master-time-label" id="gen-time">Estimating time…</div>
+  </div>
+</div>
+
+<!-- ══ GENERATION OVERLAY — full page, independent of wizard grid ══ -->
+<div id="gen-overlay" style="display:none;position:fixed;inset:0;background:var(--paper);z-index:400;overflow-y:auto;">
+  <div style="max-width:680px;margin:0 auto;padding:4rem 2rem;">
+    <div style="font-size:.68rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--crimson);margin-bottom:.6rem;">Publishing Pipeline</div>
+    <h2 style="font-family:var(--display);font-size:2.4rem;font-weight:400;margin-bottom:.4rem;" id="gen-headline">Building your story…</h2>
+    <p style="font-family:var(--body-serif);font-style:italic;color:var(--ink3);margin-bottom:2rem;">Each AI is working on its part.</p>
+
+    <!-- Master progress bar -->
+    <div style="margin-bottom:2rem;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem;">
+        <span style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);">Overall Progress</span>
+        <span style="font-family:var(--body-serif);font-size:1.6rem;" id="gen-pct">0%</span>
       </div>
-
-      <!-- Individual stage rows -->
-      <div id="gen-stages"></div>
-
-      <!-- Done area with auto-redirect -->
-      <div id="gen-done-area" class="hidden" style="margin-top:2rem;">
-        <div style="padding:1.5rem;background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-md);margin-bottom:1.25rem;" id="result-summary-wrap"></div>
-        <div style="text-align:center; padding:1.5rem 0;">
-          <div style="font-family:var(--display);font-size:2rem;margin-bottom:.4rem;">Your story is live.</div>
-          <p style="color:var(--ink3);font-family:var(--body-serif);font-style:italic;margin-bottom:1.25rem;">Redirecting to your story in <span id="redirect-count">3</span>s…</p>
-          <div style="height:3px;background:var(--paper3);border-radius:100px;overflow:hidden;margin-bottom:1.25rem;">
-            <div class="redirect-bar" id="redirect-bar" style="width:100%;"></div>
-          </div>
-          <button class="btn-next" style="width:auto;padding:11px 28px;" onclick="viewCurrentStory()">Open Story Now →</button>
-        </div>
+      <div style="height:8px;background:var(--paper3);border-radius:100px;overflow:hidden;margin-bottom:.5rem;">
+        <div id="gen-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--crimson),var(--gold));border-radius:100px;transition:width .6s cubic-bezier(.4,0,.2,1);"></div>
       </div>
+      <div style="font-size:.75rem;color:var(--ink3);" id="gen-time">Estimating time…</div>
     </div>
 
+    <!-- Stage rows -->
+    <div id="gen-stages"></div>
+
+    <!-- Done area -->
+    <div id="gen-done-area" class="hidden" style="margin-top:2rem;">
+      <div id="result-summary-wrap" style="background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.5rem;"></div>
+      <div style="text-align:center;padding:1rem 0 2rem;">
+        <div style="font-family:var(--display);font-size:2.2rem;margin-bottom:.4rem;">Your story is live.</div>
+        <p style="color:var(--ink3);font-family:var(--body-serif);font-style:italic;margin-bottom:1rem;">Opening in <span id="redirect-count">3</span>s…</p>
+        <div style="height:4px;background:var(--paper3);border-radius:100px;overflow:hidden;margin-bottom:1.5rem;">
+          <div id="redirect-bar" style="height:100%;width:100%;background:var(--crimson);border-radius:100px;transition:width 3s linear;"></div>
+        </div>
+        <button class="btn-next" style="width:auto;padding:12px 32px;" onclick="viewCurrentStory()">Open Story Now →</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1199,7 +1195,7 @@ async function startPublish() {
 
   // Switch to generation view
   document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('gen-panel').classList.add('active');
+  document.getElementById('gen-overlay').style.display = 'block'; window.scrollTo(0,0);
   document.getElementById('gen-done-area').classList.add('hidden');
 
   // Reset progress state
@@ -1480,14 +1476,22 @@ async function runImageGen(results) {
 
 async function runVideoGen(results) {
   const vidSel = selections.video;
-  if (vidSel === 'skip' || !vidSel) return { url: null };
+  console.log('runVideoGen called, vidSel=', vidSel, 'selections=', JSON.stringify(selections));
+  if (vidSel === 'skip' || !vidSel) {
+    console.log('Video skipped — no provider selected');
+    return { url: null };
+  }
 
   const keywords = results?.write?.keywords || ['hero','bravery'];
   const prompt = `Cinematic short video: ${keywords.join(', ')}. Dramatic lighting, documentary style, emotional.`;
 
   if (vidSel === 'runway') {
     const key = localStorage.getItem('valor_runway_key');
-    if (!key) return { url: null };
+    console.log('Runway: vidSel=runway, key present=', !!key, 'key preview=', key?.slice(0,8));
+    if (!key) {
+      setStage('video','error','No Runway API key found — paste it in the Video step connect panel');
+      return { url: null };
+    }
 
     // Build a tight cinematic prompt from story keywords (max 512 chars per Runway docs)
     const keywords = results?.write?.keywords || ['hero', 'courage'];
@@ -1707,7 +1711,7 @@ async function startPublish() {
   if (!title || !body) { showToast('Title and story are required'); goStep(1); return; }
 
   document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('gen-panel').classList.add('active');
+  document.getElementById('gen-overlay').style.display = 'block'; window.scrollTo(0,0);
   document.getElementById('gen-done-area').classList.add('hidden');
 
   // Reset progress state
@@ -2032,7 +2036,7 @@ function showPage(id) {
   if (btn) btn.classList.add('active');
   if (id === 'create') {
     // Hide gen-panel and reset to step 1
-    document.getElementById('gen-panel').classList.remove('active');
+    document.getElementById('gen-overlay').style.display = 'none';
     document.getElementById('gen-done-area').classList.add('hidden');
     document.getElementById('gen-stages').innerHTML = '';
     // Make sure at least wp1 is shown
